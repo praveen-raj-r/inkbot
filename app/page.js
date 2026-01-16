@@ -26,6 +26,7 @@ import {
 } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const links = [
   {
@@ -230,31 +231,120 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="lg:w-1/3">
               <div className="grid grid-cols-3 lg:grid-cols-1 gap-1 sm:gap-4">
                 {platformTabs.map((tab, index) => (
+                  //             <Button
+                  //               key={index}
+                  //               variant="ghost"
+                  //               onClick={() => setActiveTab(index)}
+                  //               className={cn(
+                  //                 "relative w-full justify-center lg:justify-start h-auto sm:p-6 p-3 rounded-xl",
+                  //                 "transition-all duration-300 group",
+                  //                 activeTab === index
+                  //                   ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 scale-[1.02]"
+                  //                   : "hover:bg-muted/50 hover:scale-[1.01]"
+                  //               )}
+                  //             >
+                  //               {/* Active indicator */}
+                  //               {activeTab === index && (
+                  //                 <>
+                  //                   {/* Mobile – top bar */}
+                  //                   <span
+                  //                     className="
+                  //   absolute top-0 left-2 right-2 h-0.5
+                  //   bg-linear-to-r from-purple-500 to-blue-500
+                  //   rounded-full
+                  //   lg:hidden
+                  // "
+                  //                   />
+
+                  //                   {/* Desktop – left bar */}
+                  //                   <span
+                  //                     className="
+                  //   absolute left-0 top-2 bottom-2 w-0.75
+                  //   bg-linear-to-b from-purple-500 to-blue-500
+                  //   rounded-full
+                  //   hidden lg:block
+                  // "
+                  //                   />
+                  //                 </>
+                  //               )}
+
+                  //               <div className="flex lg:flex-row flex-col items-center gap-4">
+                  //                 <div
+                  //                   className={cn(
+                  //                     "size-10 sm:size-12 rounded-xl flex items-center justify-center",
+                  //                     "transition-all duration-300",
+                  //                     activeTab === index
+                  //                       ? "bg-linear-to-br from-purple-500 to-blue-500 shadow-lg shadow-purple-500/30"
+                  //                       : "bg-muted group-hover:bg-muted/70"
+                  //                   )}
+                  //                 >
+                  //                   <tab.icon
+                  //                     className={cn(
+                  //                       "size-5 sm:size-7 transition-all",
+                  //                       activeTab === index
+                  //                         ? "text-white"
+                  //                         : "text-muted-foreground"
+                  //                     )}
+                  //                   />
+                  //                 </div>
+
+                  //                 <h3 className="font-semibold sm:text-lg text-center lg:text-left">
+                  //                   {tab.title}
+                  //                 </h3>
+                  //               </div>
+                  //             </Button>
                   <Button
                     key={index}
-                    variant={activeTab === index ? "outline" : "ghost"}
+                    variant="ghost"
                     onClick={() => setActiveTab(index)}
-                    className="w-full justify-start h-auto sm:p-6 p-2"
+                    className={cn(
+                      "relative w-full h-auto rounded-xl",
+                      "flex justify-center lg:justify-start",
+                      "p-3 sm:p-5 lg:p-6",
+                      "transition-all duration-300 group",
+                      activeTab === index
+                        ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 lg:scale-[1.02]"
+                        : "hover:bg-muted/50 lg:hover:scale-[1.01]"
+                    )}
                   >
-                    <div className="flex lg:flex-row flex-col items-center gap-4">
+                    {/* Active indicator */}
+                    {activeTab === index && (
+                      <>
+                        {/* Mobile – top bar */}
+                        <span className="absolute top-0 left-2 right-2 h-0.5 bg-linear-to-r from-purple-500 to-blue-500 rounded-full lg:hidden" />
+
+                        {/* Desktop – left bar */}
+                        <span className="absolute left-0 top-3 bottom-3 w-1 bg-linear-to-b from-purple-500 to-blue-500 rounded-full hidden lg:block" />
+                      </>
+                    )}
+
+                    <div className="flex flex-col lg:flex-row items-center gap-2 sm:gap-4">
                       <div
-                        className={`size-8 sm:size-12 rounded-xl flex items-center justify-center ${
+                        className={cn(
+                          "size-10 sm:size-12 rounded-xl flex items-center justify-center",
+                          "transition-all duration-300",
                           activeTab === index
-                            ? "bg-linear-to-br from-purple-500 to-blue-500"
-                            : "bg-muted"
-                        }`}
+                            ? "bg-linear-to-br from-purple-500 to-blue-500 shadow-md shadow-purple-500/30"
+                            : "bg-muted group-hover:bg-muted/70"
+                        )}
                       >
-                        <tab.icon className="size-4 sm:size-8" />
+                        <tab.icon
+                          className={cn(
+                            "size-5 sm:size-7 transition-colors",
+                            activeTab === index
+                              ? "text-white"
+                              : "text-muted-foreground"
+                          )}
+                        />
                       </div>
-                      <div className="text-left">
-                        <h3 className="sm:font-bold sm:text-lg text-wrap text-center">
-                          {tab.title}
-                        </h3>
-                      </div>
+
+                      <h3 className="font-semibold text-sm sm:text-base lg:text-lg text-center lg:text-left text-wrap">
+                        {tab.title}
+                      </h3>
                     </div>
                   </Button>
                 ))}
@@ -262,19 +352,27 @@ const Home = () => {
             </div>
 
             <div className="lg:w-2/3">
-              <Card className="bg-gray-900/50 border-gray-800 h-full">
-                <CardHeader>
+              <Card className="relative h-full overflow-hidden border border-white/10 bg-linear-to-br from-gray-900/80 to-gray-800/40 backdrop-blur-xl">
+                {/* Glow */}
+                <div className="absolute inset-0 bg-linear-to-r from-purple-500/10 to-blue-500/10 pointer-events-none" />
+
+                <CardHeader className="relative">
                   <CardTitle className="text-2xl text-white">
                     {platformTabs[activeTab].title}
                   </CardTitle>
-                  <CardDescription className="text-lg text-gray-400">
+                  <CardDescription className="text-gray-400 text-base">
                     {platformTabs[activeTab].description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+
+                <CardContent className="relative">
                   <div className="grid sm:grid-cols-2 gap-4">
                     {platformTabs[activeTab].features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-3">
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-3 rounded-lg
+                     bg-white/5 hover:bg-white/10 transition-all"
+                      >
                         <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
                         <span className="text-gray-300">{feature}</span>
                       </div>
