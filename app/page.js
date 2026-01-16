@@ -1,7 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ArrowRight, Star, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  ArrowRight,
+  Star,
+  CheckCircle,
+  Linkedin,
+  Github,
+  Mail,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +26,24 @@ import {
 } from "@/lib/data";
 import Image from "next/image";
 import Link from "next/link";
+
+const links = [
+  {
+    href: "https://www.linkedin.com/in/praveenraj-sde/",
+    label: "LinkedIn",
+    icon: Linkedin,
+  },
+  {
+    href: "https://github.com/praveen-raj-r/hostr",
+    label: "GitHub",
+    icon: Github,
+  },
+  {
+    href: "mailto:praveen1220raj@gmail.com",
+    label: "Email",
+    icon: Mail,
+  },
+];
 
 const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -81,7 +106,7 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 items-center lg:items-start">
+            <div className="flex flex-col lg:flex-row gap-4 items-center w-full lg:items-start">
               <Link href="/dashboard">
                 <Button
                   size="xl"
@@ -207,26 +232,28 @@ const Home = () => {
 
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="lg:w-1/3">
-              <div className="space-y-4">
+              <div className="grid grid-cols-3 lg:grid-cols-1 gap-1 sm:gap-4">
                 {platformTabs.map((tab, index) => (
                   <Button
                     key={index}
                     variant={activeTab === index ? "outline" : "ghost"}
                     onClick={() => setActiveTab(index)}
-                    className="w-full justify-start h-auto p-6 "
+                    className="w-full justify-start h-auto sm:p-6 p-2"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex lg:flex-row flex-col items-center gap-4">
                       <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        className={`size-8 sm:size-12 rounded-xl flex items-center justify-center ${
                           activeTab === index
                             ? "bg-linear-to-br from-purple-500 to-blue-500"
                             : "bg-muted"
                         }`}
                       >
-                        <tab.icon className="w-6 h-6" />
+                        <tab.icon className="size-4 sm:size-8" />
                       </div>
                       <div className="text-left">
-                        <h3 className="font-bold text-lg">{tab.title}</h3>
+                        <h3 className="sm:font-bold sm:text-lg text-wrap text-center">
+                          {tab.title}
+                        </h3>
                       </div>
                     </div>
                   </Button>
@@ -235,7 +262,7 @@ const Home = () => {
             </div>
 
             <div className="lg:w-2/3">
-              <Card className="bg-gray-900/50 border-gray-800">
+              <Card className="bg-gray-900/50 border-gray-800 h-full">
                 <CardHeader>
                   <CardTitle className="text-2xl text-white">
                     {platformTabs[activeTab].title}
@@ -382,12 +409,36 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t py-8 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-muted-foreground">
-            Made with ❤️ by{" "}
-            <span className="text-foreground font-semibold">RoadsideCoder</span>
-          </p>
+      <footer className="border-t border-white/10 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-6">
+            {/* Left */}
+            <p className="text-sm text-muted-foreground text-center sm:text-left">
+              © {new Date().getFullYear()}{" "}
+              <span className="font-semibold text-foreground">Hostr</span> ✦
+              Built & Maintained by{" "}
+              <span className="font-semibold text-foreground">Praveen Raj</span>
+            </p>
+
+            {/* Right */}
+            <div className="flex items-center gap-3">
+              {links.map(({ href, label, icon: Icon }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel={
+                    href.startsWith("http") ? "noopener noreferrer" : undefined
+                  }
+                  aria-label={label}
+                  title={label}
+                  className="group inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/5 text-muted-foreground transition-all duration-300 hover:text-white hover:bg-purple-500/15 hover:border-purple-500/40 hover:-translate-y-0.5 active:scale-95"
+                >
+                  <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </footer>
     </div>
