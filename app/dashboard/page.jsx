@@ -26,22 +26,23 @@ import { api } from "@/convex/_generated/api";
 import { useConvexQuery } from "@/hooks/use-convex-query";
 import { formatDistanceToNow } from "date-fns";
 import DailyViewsChart from "@/components/daily-views-chart";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   // Fetch real data
   const { data: analytics, isLoading: analyticsLoading } = useConvexQuery(
-    api.dashboard.getAnalytics
+    api.dashboard.getAnalytics,
   );
   const { data: recentPosts, isLoading: postsLoading } = useConvexQuery(
     api.dashboard.getPostsWithAnalytics,
-    { limit: 5 }
+    { limit: 5 },
   );
   const { data: recentActivity, isLoading: activityLoading } = useConvexQuery(
     api.dashboard.getRecentActivity,
-    { limit: 8 }
+    { limit: 8 },
   );
   const { data: dailyViewsData, isLoading: chartLoading } = useConvexQuery(
-    api.dashboard.getDailyViews
+    api.dashboard.getDailyViews,
   );
 
   // Format time relative to now
@@ -54,7 +55,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
+          <Loader2 className="size-8 animate-spin text-purple-400 mx-auto" />
           <p className="text-slate-400 mt-4">Loading dashboard...</p>
         </div>
       </div>
@@ -73,6 +74,37 @@ export default function DashboardPage() {
     followersGrowth: 0,
   };
 
+  const statCards = [
+    {
+      title: "Total Views",
+      value: stats.totalViews,
+      growth: stats.viewsGrowth,
+      icon: Eye,
+      iconColor: "text-blue-400",
+    },
+    {
+      title: "Total Likes",
+      value: stats.totalLikes,
+      growth: stats.likesGrowth,
+      icon: Heart,
+      iconColor: "text-red-400",
+    },
+    {
+      title: "Comments",
+      value: stats.totalComments,
+      growth: stats.commentsGrowth,
+      icon: MessageCircle,
+      iconColor: "text-yellow-400",
+    },
+    {
+      title: "Followers",
+      value: stats.totalFollowers,
+      growth: stats.followersGrowth,
+      icon: Users,
+      iconColor: "text-green-400",
+    },
+  ];
+
   return (
     <div className="space-y-8 p-4 lg:p-8">
       {/* Header */}
@@ -88,93 +120,55 @@ export default function DashboardPage() {
 
         <Link href="/dashboard/create">
           <Button variant={"primary"}>
-            <PlusCircle className="h-4 w-4 mr-2" />
+            <PlusCircle className="size-4 mr-2" />
             Create New Post
           </Button>
         </Link>
       </div>
 
       {/* Stats Grid */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="card-glass">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Total Views
-            </CardTitle>
-            <Eye className="h-4 w-4 text-blue-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.totalViews.toLocaleString()}
+        {statCards.map(({ title, value, growth, icon: Icon, iconColor }) => (
+          <Card
+            key={title}
+            className="card-glass group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-black/30"
+          >
+            {/* soft gradient glow */}
+            <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute -inset-1 bg-linear-to-r from-purple-500/20 via-blue-500/20 to-cyan-500/20 blur-xl" />
             </div>
-            {stats.viewsGrowth > 0 && (
-              <div className="flex items-center text-xs text-green-400 mt-1">
-                <TrendingUp className="h-3 w-3 mr-1" />+{stats.viewsGrowth}%
-                from last month
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        <Card className="card-glass">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Total Likes
-            </CardTitle>
-            <Heart className="h-4 w-4 text-red-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.totalLikes.toLocaleString()}
-            </div>
-            {stats.likesGrowth > 0 && (
-              <div className="flex items-center text-xs text-green-400 mt-1">
-                <TrendingUp className="h-3 w-3 mr-1" />+{stats.likesGrowth}%
-                from last month
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            <CardHeader className="relative flex flex-row items-center justify-between">
+              <CardTitle className="text-xs font-medium tracking-wide text-slate-100 uppercase">
+                {title}
+              </CardTitle>
 
-        <Card className="card-glass">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Comments
-            </CardTitle>
-            <MessageCircle className="h-4 w-4 text-yellow-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.totalComments.toLocaleString()}
-            </div>
-            {stats.commentsGrowth > 0 && (
-              <div className="flex items-center text-xs text-green-400 mt-1">
-                <TrendingUp className="h-3 w-3 mr-1" />+{stats.commentsGrowth}%
-                from last month
+              <div className="flex size-10 items-center justify-center rounded-full bg-white/5 border border-white/10">
+                <Icon className={cn("size-5", iconColor)} />
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
 
-        <Card className="card-glass">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-medium text-slate-300">
-              Followers
-            </CardTitle>
-            <Users className="h-4 w-4 text-green-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">
-              {stats.totalFollowers.toLocaleString()}
-            </div>
-            {stats.followersGrowth > 0 && (
-              <div className="flex items-center text-xs text-green-400 mt-1">
-                <TrendingUp className="h-3 w-3 mr-1" />+{stats.followersGrowth}%
-                from last month
+            <CardContent className="relative">
+              <div className="flex items-end gap-2">
+                <div className="text-3xl font-bold text-white tracking-tight">
+                  {value.toLocaleString()}
+                </div>
+
+                {growth > 0 && (
+                  <span className="mb-1 inline-flex items-center rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-400">
+                    <TrendingUp className="size-3 mr-1" />
+                    {growth}%
+                  </span>
+                )}
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              <p className="mt-2 text-xs text-slate-400">
+                Compared to last month
+              </p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Main Content Grid */}
@@ -186,11 +180,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white">Recent Posts</CardTitle>
                 <Link href="/dashboard/posts">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-slate-400 hover:text-white"
-                  >
+                  <Button variant="outline" size="sm">
                     View All
                   </Button>
                 </Link>
@@ -199,14 +189,14 @@ export default function DashboardPage() {
             <CardContent>
               {postsLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
+                  <Loader2 className="size-6 animate-spin text-purple-400" />
                 </div>
               ) : !recentPosts || recentPosts.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-slate-400 mb-4">No posts yet</p>
                   <Link href="/dashboard/create">
                     <Button variant="outline" size="sm">
-                      <PlusCircle className="h-4 w-4 mr-2" />
+                      <PlusCircle className="size-4 mr-2" />
                       Create Your First Post
                     </Button>
                   </Link>
@@ -216,19 +206,21 @@ export default function DashboardPage() {
                   {recentPosts.map((post) => (
                     <div
                       key={post._id}
-                      className="flex items-center justify-between p-4 bg-slate-800/30 hover:bg-slate-700/30 cursor-pointer rounded-lg transition-colors"
                       onClick={() =>
                         window.open(
                           `/dashboard/posts/edit/${post._id}`,
-                          "_self"
+                          "_self",
                         )
                       }
+                      className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 bg-slate-800/30 hover:bg-slate-700/30 cursor-pointer rounded-lg transition-colors"
                     >
-                      <div className="flex-1">
+                      {/* LEFT: Title + status */}
+                      <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-white truncate">
                           {post.title || "Untitled Post"}
                         </h3>
-                        <div className="flex items-center gap-4 mt-2">
+
+                        <div className="flex flex-wrap items-center gap-3 mt-2">
                           <Badge
                             variant={
                               post.status === "published"
@@ -247,7 +239,8 @@ export default function DashboardPage() {
                           >
                             {post.status}
                           </Badge>
-                          <span className="text-sm text-slate-400">
+
+                          <span className="text-xs sm:text-sm text-slate-400 whitespace-nowrap">
                             {post.status === "published" && post.publishedAt
                               ? `Published ${formatTime(post.publishedAt)}`
                               : post.status === "draft"
@@ -259,17 +252,18 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-slate-400">
+                      {/* RIGHT: Stats */}
+                      <div className="flex items-center justify-start sm:justify-end gap-4 text-xs sm:text-sm text-slate-400">
                         <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
+                          <Eye className="size-4" />
                           {post.viewCount || 0}
                         </div>
                         <div className="flex items-center gap-1">
-                          <Heart className="h-4 w-4" />
+                          <Heart className="size-4" />
                           {post.likeCount || 0}
                         </div>
                         <div className="flex items-center gap-1">
-                          <MessageCircle className="h-4 w-4" />
+                          <MessageCircle className="size-4" />
                           {post.commentCount || 0}
                         </div>
                       </div>
@@ -284,12 +278,12 @@ export default function DashboardPage() {
           <Card className="card-glass">
             <CardHeader>
               <CardTitle className="text-white flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2" />
+                <BarChart3 className="size-5 mr-2" />
                 Analytics Overview
               </CardTitle>
               <CardDescription>Views over the last 30 days</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-2">
               <DailyViewsChart data={dailyViewsData} isLoading={chartLoading} />
             </CardContent>
           </Card>
@@ -307,7 +301,7 @@ export default function DashboardPage() {
             <CardContent>
               {activityLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
+                  <Loader2 className="size-5 animate-spin text-purple-400" />
                 </div>
               ) : !recentActivity || recentActivity.length === 0 ? (
                 <div className="text-center py-8">
@@ -318,7 +312,7 @@ export default function DashboardPage() {
                   {recentActivity.map((activity, index) => (
                     <div key={index} className="flex items-start gap-3">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${
+                        className={`size-8 rounded-full flex items-center justify-center text-xs ${
                           activity.type === "like"
                             ? "bg-red-500/20 text-red-300"
                             : activity.type === "comment"
@@ -327,13 +321,13 @@ export default function DashboardPage() {
                         }`}
                       >
                         {activity.type === "like" && (
-                          <Heart className="h-3 w-3" />
+                          <Heart className="size-3" />
                         )}
                         {activity.type === "comment" && (
-                          <MessageCircle className="h-3 w-3" />
+                          <MessageCircle className="size-3" />
                         )}
                         {activity.type === "follow" && (
-                          <Users className="h-3 w-3" />
+                          <Users className="size-3" />
                         )}
                       </div>
 
@@ -369,7 +363,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700/50"
                 >
-                  <PlusCircle className="h-4 w-4 mr-2" />
+                  <PlusCircle className="size-4 mr-2" />
                   Create New Post
                 </Button>
               </Link>
@@ -379,7 +373,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700/50"
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
+                  <Calendar className="size-4 mr-2" />
                   Manage Posts
                 </Button>
               </Link>
@@ -389,7 +383,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700/50"
                 >
-                  <Users className="h-4 w-4 mr-2" />
+                  <Users className="size-4 mr-2" />
                   View Followers
                 </Button>
               </Link>

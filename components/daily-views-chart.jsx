@@ -16,7 +16,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
-  Tooltip
+  Tooltip,
 );
 
 const DailyViewsChart = ({ data, isLoading }) => {
@@ -60,6 +60,10 @@ const DailyViewsChart = ({ data, isLoading }) => {
     plugins: {
       legend: { display: false },
       tooltip: {
+        callbacks: {
+          title: (context) => data[context[0].dataIndex].fullDate,
+          label: (context) => ` ${context.parsed.y} views`,
+        },
         backgroundColor: "rgba(15, 23, 42, 0.9)",
         titleColor: "#ffffff",
         bodyColor: "#e2e8f0",
