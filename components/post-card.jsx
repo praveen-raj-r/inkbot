@@ -85,7 +85,7 @@ const PostCard = ({
             className={!publicUrl ? "pointer-events-none" : ""}
             target="_blank"
           >
-            <div className="relative w-full h-48 rounded-lg overflow-hidden">
+            <div className="relative w-full h-48 rounded-lg overflow-hidden border">
               <Image
                 src={post.featuredImage || "/placeholder.png"}
                 alt={post.title}
@@ -108,7 +108,7 @@ const PostCard = ({
                 </Badge>
                 {post.scheduledFor && post.scheduledFor > now && (
                   <div className="flex items-center text-xs text-blue-400">
-                    <Calendar className="h-3 w-3 mr-1" />
+                    <Calendar className="size-3 mr-1" />
                     {new Date(post.scheduledFor).toLocaleDateString()}
                   </div>
                 )}
@@ -128,27 +128,27 @@ const PostCard = ({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="shrink-0">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {onEdit && (
                     <DropdownMenuItem onClick={() => onEdit(post)}>
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="size-4 mr-2" />
                       Edit Post
                     </DropdownMenuItem>
                   )}
                   {publicUrl && (
                     <DropdownMenuItem asChild>
                       <Link href={publicUrl} target="_blank">
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <ExternalLink className="size-4 mr-2" />
                         View Public
                       </Link>
                     </DropdownMenuItem>
                   )}
                   {onDuplicate && (
                     <DropdownMenuItem onClick={() => onDuplicate(post)}>
-                      <Copy className="h-4 w-4 mr-2" />
+                      <Copy className="size-4 mr-2" />
                       Duplicate
                     </DropdownMenuItem>
                   )}
@@ -159,7 +159,7 @@ const PostCard = ({
                         onClick={() => onDelete(post)}
                         className="text-red-400 focus:text-red-400"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="size-4 mr-2" />
                         Delete Post
                       </DropdownMenuItem>
                     </>
@@ -171,32 +171,40 @@ const PostCard = ({
 
           {/* Author */}
           {showAuthor && post.author && (
-            <div className="flex items-center space-x-3">
-              <div className="relative w-8 h-8">
-                {post.author.imageUrl ? (
-                  <Image
-                    src={post.author.imageUrl}
-                    alt={post.author.name}
-                    fill
-                    className="rounded-full object-cover"
-                    sizes="32px"
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center text-sm font-bold">
-                    {post.author.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">
-                  {post.author.name}
-                </p>
-                {post.author.username && (
-                  <p className="text-xs text-slate-400">
-                    @{post.author.username}
+            <div className="flex">
+              <Link
+                href={`/${post.author.username}`}
+                className="group flex items-center gap-2 px-3 py-1 rounded-xl border border-white/10 bg-white/5 backdrop-blur hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+              >
+                {/* Avatar */}
+                <div className="relative size-6 shrink-0">
+                  {post.author.imageUrl ? (
+                    <Image
+                      src={post.author.imageUrl}
+                      alt={post.author.name}
+                      fill
+                      className="rounded-full object-cover"
+                      sizes="32px"
+                    />
+                  ) : (
+                    <div className="size-full rounded-full bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center text-xs font-semibold text-white">
+                      {post.author.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+
+                {/* Text */}
+                <div className="leading-tight">
+                  <p className="text-sm font-medium text-white group-hover:text-white">
+                    {post.author.name}
                   </p>
-                )}
-              </div>
+                  {post.author.username && (
+                    <p className="text-xs text-slate-400">
+                      @{post.author.username}
+                    </p>
+                  )}
+                </div>
+              </Link>
             </div>
           )}
 
@@ -227,18 +235,27 @@ const PostCard = ({
           <div className="flex items-center justify-between text-sm text-slate-400">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <Eye className="h-4 w-4" />
+                <Eye className="size-4" />
                 {post.viewCount?.toLocaleString() || 0}
               </div>
               <div className="flex items-center gap-1">
-                <Heart className="h-4 w-4" />
+                <Heart className="size-4" />
                 {post.likeCount?.toLocaleString() || 0}
               </div>
               <div className="flex items-center gap-1">
-                <MessageCircle className="h-4 w-4" />0
+                <MessageCircle className="size-4" />0
               </div>
             </div>
-            <time>
+
+            <time
+              dateTime={
+                post.status === "published" && post.publishedAt
+                  ? post.publishedAt
+                  : post.updatedAt
+              }
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-slate-400 bg-white/5 border border-white/10 backdrop-blur hover:bg-white/10 transition"
+            >
+              <span className="size-1.5 rounded-full bg-emerald-400" />
               {post.status === "published" && post.publishedAt
                 ? formatDistanceToNow(new Date(post.publishedAt), {
                     addSuffix: true,

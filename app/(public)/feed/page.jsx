@@ -26,7 +26,7 @@ export default function FeedPage() {
   // Data queries
   const { data: feedData, isLoading: feedLoading } = useConvexQuery(
     api.feed.getFeed,
-    { limit: 15 }
+    { limit: 15 },
   );
 
   const { data: suggestedUsers, isLoading: suggestionsLoading } =
@@ -34,7 +34,7 @@ export default function FeedPage() {
 
   const { data: trendingPosts, isLoading: trendingLoading } = useConvexQuery(
     api.feed.getTrendingPosts,
-    { limit: 15 }
+    { limit: 15 },
   );
 
   // Mutations
@@ -74,7 +74,7 @@ export default function FeedPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Feed Header */}
         <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold gradient-text-primary pb-2">
+          <h1 className="text-4xl sm:text-5xl font-bold gradient-text-primary pb-2">
             Discover Amazing Content
           </h1>
           <p className="text-slate-400">
@@ -83,10 +83,10 @@ export default function FeedPage() {
         </div>
 
         {/* Main Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-6 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 sm:gap-8">
           <div className="lg:col-span-4 space-y-6">
             {/* Feed Tabs */}
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 p-1 border border-border rounded-xl bg-muted/30">
               <Button
                 onClick={() => setActiveTab("feed")}
                 variant={activeTab === "feed" ? "primary" : "ghost"}
@@ -187,7 +187,7 @@ export default function FeedPage() {
           </div>
 
           {/* Left Sidebar - Following */}
-          <div className="lg:col-span-2 space-y-6 mt-14">
+          <div className="lg:col-span-2 space-y-6">
             {/* Suggested Users */}
             <Card className="card-glass">
               <CardHeader>
