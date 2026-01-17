@@ -90,10 +90,4 @@ Inkbot follows a modern full-stack SaaS architecture:
 - Reusable UI components and hooks
 - Real-time data synchronization without polling
 - Clean separation between UI, data, and authentication logic
-- Production-style CMS and creator workflow design
-
----
-
-## Why This Project
-
-Inkbot demonstrates a product-oriented approach to building creator platforms, focusing on realistic content workflows, maintainable architecture, and scalable frontend and backend integration.
+- Production-style CMS and creator workflow design 
