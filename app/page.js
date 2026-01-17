@@ -416,7 +416,7 @@ const Home = () => {
             and growing their business with our AI-powered platform.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex flex-wrap gap-6 justify-center">
             <Link href="/dashboard">
               <Button
                 size="xl"
