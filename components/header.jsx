@@ -72,7 +72,7 @@ export default function Header() {
             {/* Show Dashboard link on feed page */}
             {path === "/feed" && (
               <Link href="/dashboard">
-                <Button variant="outline" className="hidden sm:flex" size="sm">
+                <Button variant="outline" className="flex" size="sm">
                   <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden md:inline ml-2">Dashboard</span>
                 </Button>

@@ -25,6 +25,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useConvexQuery } from "@/hooks/use-convex-query";
+import { api } from "@/convex/_generated/api";
 
 const now = Date.now();
 const PostCard = ({
@@ -72,6 +74,10 @@ const PostCard = ({
 
   const statusBadge = getStatusBadge(post);
   const publicUrl = getPostUrl();
+  const { data: comments, isLoading: commentsLoading } = useConvexQuery(
+    api.comments.getPostComments,
+    { postId: post._id },
+  );
 
   return (
     <Card
@@ -242,9 +248,11 @@ const PostCard = ({
                 <Heart className="size-4" />
                 {post.likeCount?.toLocaleString() || 0}
               </div>
-              <div className="flex items-center gap-1">
-                <MessageCircle className="size-4" />0
-              </div>
+              {!commentsLoading && (
+                <div className="flex items-center gap-1">
+                  <MessageCircle className="size-4" /> {comments.length || 0}
+                </div>
+              )}
             </div>
 
             <time
@@ -258,11 +266,11 @@ const PostCard = ({
               <span className="size-1.5 rounded-full bg-emerald-400" />
               {post.status === "published" && post.publishedAt
                 ? formatDistanceToNow(new Date(post.publishedAt), {
-                    addSuffix: true,
-                  })
+                  addSuffix: true,
+                })
                 : formatDistanceToNow(new Date(post.updatedAt), {
-                    addSuffix: true,
-                  })}
+                  addSuffix: true,
+                })}
             </time>
           </div>
         </div>

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { generateBlogContent, improveContent } from "@/app/actions/gemini";
 import { BarLoader } from "react-spinners";
+import Image from "next/image";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
@@ -33,7 +34,7 @@ const quillConfig = {
         ],
         ["image", "video"],
       ],
-      handlers: { image: function () {} },
+      handlers: { image: function () { } },
     },
   },
   formats: [
@@ -107,7 +108,7 @@ export default function PostEditorContent({
       if (result.success) {
         setValue("content", result.content);
         toast.success(
-          `Content ${type === "generate" ? "generated" : improvementType + "d"} successfully!`
+          `Content ${type === "generate" ? "generated" : improvementType + "d"} successfully!`,
         );
       } else {
         toast.error(result.error);
@@ -130,11 +131,17 @@ export default function PostEditorContent({
           {/* Featured Image */}
           {watchedValues.featuredImage ? (
             <div className="relative group">
-              <img
-                src={watchedValues.featuredImage}
-                alt="Featured"
-                className="w-full h-80 object-cover rounded-xl"
-              />
+              <div className="relative w-full h-80 border rounded">
+                <Image
+                  src={watchedValues.featuredImage}
+                  alt="Featured"
+                  fill
+                  className="object-cover rounded-xl"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  priority
+                />
+              </div>
+
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center space-x-3">
                 <Button
                   onClick={() => onImageUpload("featured")}
@@ -169,83 +176,85 @@ export default function PostEditorContent({
             </button>
           )}
 
-          {/* Title */}
-          <div>
-            <Input
-              {...register("title")}
-              placeholder="Post title..."
-              className="border-0 text-4xl font-bold bg-transparent placeholder:text-slate-500 text-white p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
-              style={{ fontSize: "2.5rem", lineHeight: "1.2" }}
-            />
-            {errors.title && (
-              <p className="text-red-400 mt-2">{errors.title.message}</p>
-            )}
-          </div>
+          <div className="space-y-5 border rounded p-3">
+            {/* Title */}
+            <div>
+              <Input
+                {...register("title")}
+                placeholder="Post title..."
+                className="border-0 text-4xl font-bold bg-transparent placeholder:text-slate-500 text-white p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
+                style={{ fontSize: "2.5rem", lineHeight: "1.2" }}
+              />
+              {errors.title && (
+                <p className="text-red-400 mt-2">{errors.title.message}</p>
+              )}
+            </div>
 
-          {/* AI Tools */}
-          <div>
-            {!hasContent ? (
-              <Button
-                onClick={() => handleAI("generate")}
-                disabled={!hasTitle || isGenerating || isImproving}
-                variant="outline"
-                size="sm"
-                className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white disabled:opacity-50 w-full"
-              >
-                <Wand2 className="h-4 w-4 mr-2" />
-                Generate Content with AI
-              </Button>
-            ) : (
-              <div className="grid grid-cols-3 w-full gap-2">
-                {[
-                  { type: "enhance", icon: Sparkles, color: "green" },
-                  { type: "expand", icon: Plus, color: "blue" },
-                  { type: "simplify", icon: Minus, color: "orange" },
-                ].map(({ type, icon: Icon, color }) => (
-                  <Button
-                    key={type}
-                    onClick={() => handleAI("improve", type)}
-                    disabled={isGenerating || isImproving}
-                    variant="outline"
-                    size="sm"
-                    className={`border-${color}-500 text-${color}-400 hover:bg-${color}-500 hover:text-white disabled:opacity-50`}
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    AI {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Button>
-                ))}
-              </div>
-            )}
-            {!hasTitle && (
-              <p className="text-xs text-slate-400 w-full pt-2">
-                Add a title to enable AI content generation
-              </p>
-            )}
-          </div>
+            {/* AI Tools */}
+            <div>
+              {!hasContent ? (
+                <Button
+                  onClick={() => handleAI("generate")}
+                  disabled={!hasTitle || isGenerating || isImproving}
+                  variant="outline"
+                  size="sm"
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white disabled:opacity-50 w-full"
+                >
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Generate Content with AI
+                </Button>
+              ) : (
+                <div className="grid grid-cols-3 w-full gap-2">
+                  {[
+                    { type: "enhance", icon: Sparkles, color: "green" },
+                    { type: "expand", icon: Plus, color: "blue" },
+                    { type: "simplify", icon: Minus, color: "orange" },
+                  ].map(({ type, icon: Icon, color }) => (
+                    <Button
+                      key={type}
+                      onClick={() => handleAI("improve", type)}
+                      disabled={isGenerating || isImproving}
+                      variant="outline"
+                      size="sm"
+                      className={`border-${color}-500 text-${color}-400 hover:bg-${color}-500 hover:text-white disabled:opacity-50`}
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      AI {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              {!hasTitle && (
+                <p className="text-xs text-slate-400 w-full pt-2">
+                  Add a title to enable AI content generation
+                </p>
+              )}
+            </div>
 
-          {(isGenerating || isImproving) && (
-            <BarLoader width={"95%"} color="#D8B4FE" />
-          )}
-
-          {/* Editor */}
-          <div className="prose prose-lg max-w-none">
-            <ReactQuill
-              ref={setQuillRef}
-              theme="snow"
-              value={watchedValues.content}
-              onChange={(content) => setValue("content", content)}
-              modules={getQuillModules()}
-              formats={quillConfig.formats}
-              placeholder="Tell your story... or use AI to generate content!"
-              style={{
-                minHeight: "400px",
-                fontSize: "1.125rem",
-                lineHeight: "1.7",
-              }}
-            />
-            {errors.content && (
-              <p className="text-red-400 mt-2">{errors.content.message}</p>
+            {(isGenerating || isImproving) && (
+              <BarLoader width={"100%"} color="#D8B4FE" />
             )}
+
+            {/* Editor */}
+            <div className="prose prose-lg max-w-none">
+              <ReactQuill
+                ref={setQuillRef}
+                theme="snow"
+                value={watchedValues.content}
+                onChange={(content) => setValue("content", content)}
+                modules={getQuillModules()}
+                formats={quillConfig.formats}
+                placeholder="Tell your story... or use AI to generate content!"
+                style={{
+                  minHeight: "400px",
+                  fontSize: "1.125rem",
+                  lineHeight: "1.7",
+                }}
+              />
+              {errors.content && (
+                <p className="text-red-400 mt-2">{errors.content.message}</p>
+              )}
+            </div>
           </div>
         </div>
       </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ export default function PostsPage() {
   const deletePost = useConvexMutation(api.posts.deletePost);
 
   // Filter and sort posts
-  const filteredPosts = React.useMemo(() => {
+  const filteredPosts = useMemo(() => {
     if (!posts) return [];
 
     let filtered = posts.filter((post) => {

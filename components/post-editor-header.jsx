@@ -17,6 +17,7 @@ import {
   Settings,
   Loader2,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function PostEditorHeader({
   mode,
@@ -60,29 +61,43 @@ export default function PostEditorHeader({
 
         {/* Right */}
         <div className="flex items-center space-x-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onSettingsOpen}
-            className="text-slate-400 hover:text-white"
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onSettingsOpen}
+                className="text-slate-400 hover:text-white"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Configure Post</p>
+            </TooltipContent>
+          </Tooltip>
 
           {!isEdit && (
-            <Button
-              onClick={onSave}
-              disabled={isPublishing}
-              variant="ghost"
-              size="sm"
-              className="text-slate-400 hover:text-white"
-            >
-              {isPublishing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4" />
-              )}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={onSave}
+                  disabled={isPublishing}
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-400 hover:text-white"
+                >
+                  {isPublishing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Save</p>
+              </TooltipContent>
+            </Tooltip>
           )}
 
           {isEdit ? (
