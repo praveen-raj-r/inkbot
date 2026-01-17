@@ -41,7 +41,7 @@ export default function Header() {
         <Link href={isAuthenticated ? "/feed" : "/"} className="shrink-0">
           <Image
             src="/logo.png"
-            alt="Creatr Logo"
+            alt="Inkbot Logo"
             width={96}
             height={32}
             className="h-8 sm:h-10 w-auto object-contain"

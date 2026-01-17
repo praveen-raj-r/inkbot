@@ -66,7 +66,7 @@ export default function DashboardLayout({ children }) {
       <aside
         className={cn(
           "fixed top-0 left-0 h-full w-64 bg-slate-800/50 backdrop-blur-sm border-r border-slate-700 z-50 transition-transform duration-300 lg:translate-x-0",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         {/* Sidebar Header */}
@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }) {
           <Link href={"/"} className="shrink-0">
             <Image
               src="/logo.png"
-              alt="Creatr Logo"
+              alt="Inkbot Logo"
               width={96}
               height={32}
               className="h-8 sm:h-10 md:h-11 w-auto object-contain"
@@ -110,7 +110,7 @@ export default function DashboardLayout({ children }) {
                     "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                     isActive
                       ? "bg-linear-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 text-white"
-                      : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                      : "text-slate-300 hover:text-white hover:bg-slate-700/50",
                   )}
                 >
                   <item.icon
@@ -118,7 +118,7 @@ export default function DashboardLayout({ children }) {
                       "h-5 w-5 transition-colors",
                       isActive
                         ? "text-purple-400"
-                        : "text-slate-400 group-hover:text-white"
+                        : "text-slate-400 group-hover:text-white",
                     )}
                   />
                   <span className="font-medium">{item.title}</span>

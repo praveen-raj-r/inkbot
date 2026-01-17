@@ -51,7 +51,7 @@ const Home = () => {
 
       {/* Dynamic cursor effect */}
       <div
-        className="fixed w-96 h-96 bg-linear-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl pointer-events-none z-0"
+        className="fixed size-96 bg-linear-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl pointer-events-none z-0"
         style={{
           left: mousePosition.x - 192,
           top: mousePosition.y - 192,
@@ -91,7 +91,7 @@ const Home = () => {
                   className="rounded-full w-full sm:w-auto text-white"
                 >
                   Start Creating for Free
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="size-4" />
                 </Button>
               </Link>
               <Link href="/feed">
@@ -114,7 +114,7 @@ const Home = () => {
                     "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop",
                     "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop",
                   ].map((src, i) => (
-                    <div key={i} className="relative w-6 h-6 sm:w-8 sm:h-8">
+                    <div key={i} className="relative size-6 sm:size-8">
                       <Image
                         src={src}
                         alt={`Creator ${i + 1}`}
@@ -131,7 +131,7 @@ const Home = () => {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400"
+                    className="size-3 sm:size-4 fill-yellow-400 text-yellow-400"
                   />
                 ))}
                 <span className="ml-1">4.9/5</span>
@@ -173,20 +173,25 @@ const Home = () => {
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="group transition-all duration-300 hover:scale-105 card-glass"
+                className="group transition-all duration-300 hover:scale-105 card-glass py-4 sm:py-6"
               >
-                <CardContent className="p-6 sm:p-8">
+                <CardContent className="flex flex-row sm:flex-col sm:items-baseline items-center gap-4 px-4 sm:px-6">
                   <div
-                    className={`w-12 h-12 sm:w-16 sm:h-16 bg-linear-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform`}
+                    className={cn(
+                      "size-8 sm:size-14 bg-linear-to-br rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform flex-none",
+                      feature.color,
+                    )}
                   >
-                    <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                    <feature.icon className="size-4 sm:size-7 text-white" />
                   </div>
-                  <CardTitle className="text-lg sm:text-xl mb-3 sm:mb-4 text-white">
-                    {feature.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm sm:text-base text-gray-400">
-                    {feature.desc}
-                  </CardDescription>
+                  <div>
+                    <CardTitle className="text-lg sm:text-xl mb-1 text-white">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm sm:text-base text-gray-400">
+                      {feature.desc}
+                    </CardDescription>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -287,7 +292,7 @@ const Home = () => {
                         className="flex items-center gap-3 p-3 rounded-lg
                      bg-white/5 hover:bg-white/10 transition-all"
                       >
-                        <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
+                        <CheckCircle className="size-5 text-green-400 shrink-0" />
                         <span className="text-gray-300">{feature}</span>
                       </div>
                     ))}
@@ -308,11 +313,11 @@ const Home = () => {
             </span>
           </h2>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-6 lg:gap-8">
             {socialProofStats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-linear-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                  <stat.icon className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+                <div className="size-12 sm:size-14 lg:size-16 bg-linear-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <stat.icon className="size-6 sm:size-7 lg:size-8 text-white" />
                 </div>
                 <div className="text-3xl sm:text-4xl lg:text-5xl font-black mb-2 gradient-text-accent">
                   {stat.metric}
@@ -342,34 +347,39 @@ const Home = () => {
               <span className="gradient-text-primary">What creators say</span>
             </h2>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-4 lg:gap-6">
             {testimonials.map((testimonial, index) => (
               <Card
                 key={index}
-                className="transition-all duration-300 hover:shadow-lg card-glass"
+                className="transition-all duration-300 hover:shadow-lg card-glass py-4 sm:py-6"
               >
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
+                <CardContent className="px-4 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1 mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="size-4 fill-yellow-400 text-yellow-400"
+                        />
+                      ))}
+                    </div>
+                    <p className="mb-6 leading-relaxed text-gray-300">
+                      &quot;{testimonial.content}&quot;
+                    </p>
                   </div>
-                  <p className="mb-6 leading-relaxed text-gray-300">
-                    &quot;{testimonial.content}&quot;
-                  </p>
                   <div className="flex items-center gap-4">
-                    <div className="relative w-12 h-12">
-                      <Image
-                        src={`https://images.unsplash.com/photo-${testimonial.imageId}?w=100&h=100&fit=crop&crop=face`}
-                        alt={testimonial.name}
-                        fill
-                        className="rounded-full border-2 border-gray-700 object-cover"
-                        sizes="48px"
-                      />
+                    <div className="relative size-12 shrink-0">
+                      <div className="absolute inset-0 rounded-full bg-linear-to-br from-purple-500 to-blue-500 p-0.5">
+                        <div className="relative size-full rounded-full overflow-hidden bg-black">
+                          <Image
+                            src={`https://images.unsplash.com/photo-${testimonial.imageId}?w=100&h=100&fit=crop&crop=face`}
+                            alt={testimonial.name}
+                            fill
+                            sizes="48px"
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <div className="font-semibold text-white">
@@ -387,6 +397,11 @@ const Home = () => {
               </Card>
             ))}
           </div>
+
+          <p className="mt-10 text-xs text-gray-500 italic text-center">
+            * Testimonials are not from real users and are provided for
+            illustrative purposes only. Actual results may vary.
+          </p>
         </div>
       </section>
 
@@ -409,7 +424,7 @@ const Home = () => {
                 className="rounded-full text-white w-full"
               >
                 Start Your Journey
-                <ArrowRight className="h-5 w-5" />
+                <ArrowRight className="size-5" />
               </Button>
             </Link>
             <Link href="/feed">
@@ -449,9 +464,9 @@ const Home = () => {
                   }
                   aria-label={label}
                   title={label}
-                  className="group inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/10 bg-white/5 text-muted-foreground transition-all duration-300 hover:text-white hover:bg-purple-500/15 hover:border-purple-500/40 hover:-translate-y-0.5 active:scale-95"
+                  className="group inline-flex items-center justify-center size-10 rounded-full border border-white/10 bg-white/5 text-muted-foreground transition-all duration-300 hover:text-white hover:bg-purple-500/15 hover:border-purple-500/40 hover:-translate-y-0.5 active:scale-95"
                 >
-                  <Icon className="h-5 w-5 transition-transform group-hover:scale-110" />
+                  <Icon className="size-5 transition-transform group-hover:scale-110" />
                 </a>
               ))}
             </div>
