@@ -60,7 +60,7 @@ const Home = () => {
       ></div>
 
       {/* Hero Section */}
-      <section className="relative z-10 mt-48 px-4 sm:px-6">
+      <section className="relative z-10 mt-40 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="space-y-6 sm:space-y-8 text-center lg:text-left">
             <div className="space-y-4 sm:space-y-6">
@@ -105,7 +105,7 @@ const Home = () => {
               </Link>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 sm:gap-8 text-sm text-gray-400">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 sm:gap-8 text-sm text-gray-400 mb-0!">
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
                   {[
@@ -137,6 +137,10 @@ const Home = () => {
                 <span className="ml-1">4.9/5</span>
               </div>
             </div>
+            <p className="mt-4 text-[11px] sm:text-xs text-gray-500 italic text-center lg:text-left">
+              * Creator count and ratings are illustrative and shown for
+              demonstration purposes.
+            </p>
           </div>
 
           {/* Interactive 3D-style elements */}
