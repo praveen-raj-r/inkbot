@@ -309,80 +309,77 @@ const PostPage = ({ params }) => {
             <BarLoader width={"100%"} color="#D8B4FE" />
           ) : comments && comments.length > 0 ? (
             <div className="space-y-4">
-              {comments.map((comment) => {
-                console.log(comment.author.username);
-                return (
-                  <Card key={comment._id} className="card-glass">
-                    <CardContent>
-                      <div className="flex items-start justify-between mb-3">
-                        <Link
-                          href={`/${comment.author.username}`}
-                          className="flex items-center space-x-3"
-                        >
-                          <div className="relative w-8 h-8">
-                            {comment.author?.imageUrl ? (
-                              <Image
-                                src={comment.author.imageUrl}
-                                alt={comment.author.name}
-                                fill
-                                className="rounded-full object-cover"
-                                sizes="32px"
-                              />
-                            ) : (
-                              <div className="w-full h-full rounded-full bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center text-sm font-bold">
-                                {comment.author?.name?.charAt(0).toUpperCase()}
-                              </div>
+              {comments.map((comment) => (
+                <Card key={comment._id} className="card-glass">
+                  <CardContent>
+                    <div className="flex items-start justify-between mb-3">
+                      <Link
+                        href={`/${comment.author.username}`}
+                        className="flex items-center space-x-3"
+                      >
+                        <div className="relative w-8 h-8">
+                          {comment.author?.imageUrl ? (
+                            <Image
+                              src={comment.author.imageUrl}
+                              alt={comment.author.name}
+                              fill
+                              className="rounded-full object-cover"
+                              sizes="32px"
+                            />
+                          ) : (
+                            <div className="w-full h-full rounded-full bg-linear-to-br from-purple-600 to-blue-600 flex items-center justify-center text-sm font-bold">
+                              {comment.author?.name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <p className="font-medium text-white">
+                            {comment.author?.name || "Anonymous"}
+                            {isPostAuthor(comment) && (
+                              <Badge className="ml-3">author</Badge>
                             )}
-                          </div>
 
-                          <div>
-                            <p className="font-medium text-white">
-                              {comment.author?.name || "Anonymous"}
-                              {isPostAuthor(comment) && (
-                                <Badge className="ml-3">author</Badge>
-                              )}
+                            {isAuthorOfComment(comment) && (
+                              <span className="ml-1 font-light text-sm text-slate-400">
+                                (You)
+                              </span>
+                            )}
+                          </p>
 
-                              {isAuthorOfComment(comment) && (
-                                <span className="ml-1 font-light text-sm text-slate-400">
-                                  (You)
-                                </span>
-                              )}
-                            </p>
+                          <p className="text-xs text-slate-400">
+                            {new Date(comment.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </p>
+                        </div>
+                      </Link>
 
-                            <p className="text-xs text-slate-400">
-                              {new Date(comment.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                },
-                              )}
-                            </p>
-                          </div>
-                        </Link>
+                      {/* delete button */}
+                      {isAuthorOfComment(comment) && (
+                        <Button
+                          onClick={() => handleDeleteComment(comment._id)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-slate-400 hover:text-red-400"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
 
-                        {/* delete button */}
-                        {isAuthorOfComment(comment) && (
-                          <Button
-                            onClick={() => handleDeleteComment(comment._id)}
-                            variant="ghost"
-                            size="sm"
-                            className="text-slate-400 hover:text-red-400"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-
-                      <p className="text-slate-300 whitespace-pre-wrap">
-                        {comment.content}
-                      </p>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                    <p className="text-slate-300 whitespace-pre-wrap">
+                      {comment.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           ) : (
             <Card className="card-glass">

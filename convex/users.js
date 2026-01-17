@@ -13,7 +13,7 @@ export const store = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -47,7 +47,7 @@ export const getCurrentUser = query({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -74,7 +74,7 @@ export const updateUsername = mutation({
     const user = await ctx.db
       .query("users")
       .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
       )
       .unique();
 
@@ -86,7 +86,7 @@ export const updateUsername = mutation({
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;
     if (!usernameRegex.test(args.username)) {
       throw new Error(
-        "Username can only contain letters, numbers, underscores, and hyphens"
+        "Username can only contain letters, numbers, underscores, and hyphens",
       );
     }
 
@@ -95,14 +95,17 @@ export const updateUsername = mutation({
     }
 
     // Check if username is already taken (skip check if it's the same as current)
-    if (args.username !== user.username) {
+    if (args.username !== (user.username ?? "")) {
       const existingUser = await ctx.db
         .query("users")
         .withIndex("by_username", (q) => q.eq("username", args.username))
         .unique();
 
-      if (existingUser) {
-        throw new Error("Username is already taken");
+      if (existingUser && existingUser._id !== user._id) {
+        return {
+          ok: false,
+          code: "USERNAME_TAKEN",
+        };
       }
     }
 

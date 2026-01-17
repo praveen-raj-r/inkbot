@@ -26,7 +26,7 @@ const usernameSchema = z.object({
     .max(20, "Username must be less than 20 characters")
     .regex(
       /^[a-zA-Z0-9_-]+$/,
-      "Username can only contain letters, numbers, underscores, and hyphens"
+      "Username can only contain letters, numbers, underscores, and hyphens",
     ),
 });
 
@@ -35,7 +35,7 @@ export default function SettingsPage() {
 
   // Data fetching
   const { data: currentUser, isLoading } = useConvexQuery(
-    api.users.getCurrentUser
+    api.users.getCurrentUser,
   );
   const updateUsername = useConvexMutation(api.users.updateUsername);
 
@@ -65,16 +65,29 @@ export default function SettingsPage() {
 
   // Form submission
   const onSubmit = async (data) => {
+    // 👇 add this at the top
+    const isSameUsername = data.username === currentUser?.username;
+    if (isSameUsername) {
+      toast.info("This is already your current username");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await updateUsername.mutate({
+      const res = await updateUsername.mutate({
         username: data.username,
       });
-
-      toast.success("Username updated successfully!");
+      if (!res.ok) {
+        toast.error("Username is already taken");
+      } else {
+        toast.success("Username updated successfully!");
+      }
     } catch (error) {
-      toast.error(error.message || "Failed to update username");
+      const message =
+        error.data?.message || error.message || "Failed to update username";
+
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

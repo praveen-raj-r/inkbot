@@ -98,17 +98,17 @@ const FollowersPage = () => {
   // Data fetching
   const { data: followers, isLoading: followersLoading } = useConvexQuery(
     api.follows.getMyFollowers,
-    { limit: 100 }
+    { limit: 100 },
   );
 
   const { data: following, isLoading: followingLoading } = useConvexQuery(
     api.follows.getMyFollowing,
-    { limit: 100 }
+    { limit: 100 },
   );
 
   // Mutations
   const { mutate: toggleFollow, isLoading: isToggling } = useConvexMutation(
-    api.follows.toggleFollow
+    api.follows.toggleFollow,
   );
 
   // Handle follow/unfollow
@@ -127,14 +127,25 @@ const FollowersPage = () => {
     return (users || []).filter(
       (user) =>
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchQuery.toLowerCase())
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   };
 
   const filteredFollowers = filterUsers(followers);
   const filteredFollowing = filterUsers(following);
 
-  const isLoading = followersLoading || followingLoading;
+  const tabs = [
+    {
+      value: "followers",
+      users: filteredFollowers,
+      variant: "follower",
+    },
+    {
+      value: "following",
+      users: filteredFollowing,
+      variant: "following",
+    },
+  ];
 
   return (
     <div className="space-y-6 p-4 lg:p-8">
@@ -160,7 +171,7 @@ const FollowersPage = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="followers">
-        <TabsList className="grid w-full grid-cols-2 bg-slate-900">
+        <TabsList className="grid w-  grid-cols-2 bg-slate-900 border h-10">
           <TabsTrigger value="followers">
             Followers ({filteredFollowers.length})
           </TabsTrigger>
@@ -170,30 +181,19 @@ const FollowersPage = () => {
         </TabsList>
 
         {/* Followers Tab */}
-        <TabsContent value="followers" className="mt-6">
-          {filteredFollowers.map((user) => (
-            <UserCard
-              key={user._id}
-              user={user}
-              variant="follower"
-              isLoading={isToggling}
-              onToggle={handleFollowToggle}
-            />
-          ))}
-        </TabsContent>
-
-        {/* Following Tab */}
-        <TabsContent value="following" className="mt-6">
-          {filteredFollowing.map((user) => (
-            <UserCard
-              key={user._id}
-              user={user}
-              variant="following"
-              isLoading={isToggling}
-              onToggle={handleFollowToggle}
-            />
-          ))}
-        </TabsContent>
+        {tabs.map(({ value, users, variant }) => (
+          <TabsContent key={value} value={value} className="mt-6">
+            {users.map((user) => (
+              <UserCard
+                key={user._id}
+                user={user}
+                variant={variant}
+                isLoading={isToggling}
+                onToggle={handleFollowToggle}
+              />
+            ))}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );

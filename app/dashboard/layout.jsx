@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }) {
         )}
       >
         {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-700">
+        <div className="flex items-center justify-between p-2 border-b border-slate-700">
           <Link href={"/"} className="shrink-0">
             <Image
               src="/logo.png"
