@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  ArrowRight,
-  Star,
-  CheckCircle,
-  Linkedin,
-  Github,
-  Mail,
-} from "lucide-react";
+import { ArrowRight, Star, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   features,
+  footerMediaLinks,
   platformTabs,
   socialProofStats,
   testimonials,
@@ -27,24 +21,6 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
-const links = [
-  {
-    href: "https://www.linkedin.com/in/praveenraj-sde/",
-    label: "LinkedIn",
-    icon: Linkedin,
-  },
-  {
-    href: "https://github.com/praveen-raj-r/hostr",
-    label: "GitHub",
-    icon: Github,
-  },
-  {
-    href: "mailto:praveen1220raj@gmail.com",
-    label: "Email",
-    icon: Mail,
-  },
-];
 
 const Home = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -235,68 +211,6 @@ const Home = () => {
             <div className="lg:w-1/3">
               <div className="grid grid-cols-3 lg:grid-cols-1 gap-1 sm:gap-4">
                 {platformTabs.map((tab, index) => (
-                  //             <Button
-                  //               key={index}
-                  //               variant="ghost"
-                  //               onClick={() => setActiveTab(index)}
-                  //               className={cn(
-                  //                 "relative w-full justify-center lg:justify-start h-auto sm:p-6 p-3 rounded-xl",
-                  //                 "transition-all duration-300 group",
-                  //                 activeTab === index
-                  //                   ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 scale-[1.02]"
-                  //                   : "hover:bg-muted/50 hover:scale-[1.01]"
-                  //               )}
-                  //             >
-                  //               {/* Active indicator */}
-                  //               {activeTab === index && (
-                  //                 <>
-                  //                   {/* Mobile – top bar */}
-                  //                   <span
-                  //                     className="
-                  //   absolute top-0 left-2 right-2 h-0.5
-                  //   bg-linear-to-r from-purple-500 to-blue-500
-                  //   rounded-full
-                  //   lg:hidden
-                  // "
-                  //                   />
-
-                  //                   {/* Desktop – left bar */}
-                  //                   <span
-                  //                     className="
-                  //   absolute left-0 top-2 bottom-2 w-0.75
-                  //   bg-linear-to-b from-purple-500 to-blue-500
-                  //   rounded-full
-                  //   hidden lg:block
-                  // "
-                  //                   />
-                  //                 </>
-                  //               )}
-
-                  //               <div className="flex lg:flex-row flex-col items-center gap-4">
-                  //                 <div
-                  //                   className={cn(
-                  //                     "size-10 sm:size-12 rounded-xl flex items-center justify-center",
-                  //                     "transition-all duration-300",
-                  //                     activeTab === index
-                  //                       ? "bg-linear-to-br from-purple-500 to-blue-500 shadow-lg shadow-purple-500/30"
-                  //                       : "bg-muted group-hover:bg-muted/70"
-                  //                   )}
-                  //                 >
-                  //                   <tab.icon
-                  //                     className={cn(
-                  //                       "size-5 sm:size-7 transition-all",
-                  //                       activeTab === index
-                  //                         ? "text-white"
-                  //                         : "text-muted-foreground"
-                  //                     )}
-                  //                   />
-                  //                 </div>
-
-                  //                 <h3 className="font-semibold sm:text-lg text-center lg:text-left">
-                  //                   {tab.title}
-                  //                 </h3>
-                  //               </div>
-                  //             </Button>
                   <Button
                     key={index}
                     variant="ghost"
@@ -308,7 +222,7 @@ const Home = () => {
                       "transition-all duration-300 group",
                       activeTab === index
                         ? "bg-linear-to-r from-purple-500/20 to-blue-500/20 lg:scale-[1.02]"
-                        : "hover:bg-muted/50 lg:hover:scale-[1.01]"
+                        : "hover:bg-muted/50 lg:hover:scale-[1.01]",
                     )}
                   >
                     {/* Active indicator */}
@@ -329,7 +243,7 @@ const Home = () => {
                           "transition-all duration-300",
                           activeTab === index
                             ? "bg-linear-to-br from-purple-500 to-blue-500 shadow-md shadow-purple-500/30"
-                            : "bg-muted group-hover:bg-muted/70"
+                            : "bg-muted group-hover:bg-muted/70",
                         )}
                       >
                         <tab.icon
@@ -337,7 +251,7 @@ const Home = () => {
                             "size-5 sm:size-7 transition-colors",
                             activeTab === index
                               ? "text-white"
-                              : "text-muted-foreground"
+                              : "text-muted-foreground",
                           )}
                         />
                       </div>
@@ -390,11 +304,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-12 sm:mb-16">
             <span className="gradient-text-primary">
-              Loved by creators worldwide
+              Designed for creators worldwide
             </span>
           </h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-6 lg:gap-8">
             {socialProofStats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-linear-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
@@ -409,6 +323,11 @@ const Home = () => {
               </div>
             ))}
           </div>
+
+          <p className="mt-10 text-xs text-gray-500 italic">
+            * Illustrative metrics shown for product and UI demonstration
+            purposes only.
+          </p>
         </div>
       </section>
 
@@ -520,7 +439,7 @@ const Home = () => {
 
             {/* Right */}
             <div className="flex items-center gap-3">
-              {links.map(({ href, label, icon: Icon }) => (
+              {footerMediaLinks.map(({ href, label, icon: Icon }) => (
                 <a
                   key={href}
                   href={href}
