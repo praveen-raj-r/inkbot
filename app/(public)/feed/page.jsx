@@ -255,9 +255,12 @@ export default function FeedPage() {
                         </div>
                         {user.recentPosts && user.recentPosts.length > 0 && (
                           <div className="text-xs text-slate-400 pl-13">
-                            Latest: &quot;
-                            {user.recentPosts[0].title.substring(0, 30)}
-                            ...&quot;
+                            Latest: (
+                            {user.recentPosts
+                              .slice(0, 3)
+                              .map((o) => o.title.substring(0, 30))
+                              .join(", ")}
+                            ...)
                           </div>
                         )}
                       </div>

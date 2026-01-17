@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { use } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Calendar, UserPlus, UserCheck } from "lucide-react";
@@ -14,7 +14,7 @@ import PostCard from "@/components/post-card";
 import PublicHeader from "./_components/public-header";
 
 export default function ProfilePage({ params }) {
-  const { username } = React.use(params);
+  const { username } =  use(params);
   const { user: currentUser } = useUser();
 
   // Get user profile
@@ -30,19 +30,19 @@ export default function ProfilePage({ params }) {
     {
       username,
       limit: 20,
-    }
+    },
   );
 
   // Get follower count
   const { data: followerCount } = useConvexQuery(
     api.follows.getFollowerCount,
-    user ? { userId: user._id } : "skip"
+    user ? { userId: user._id } : "skip",
   );
 
   // Check if current user is following this profile
   const { data: isFollowing } = useConvexQuery(
     api.follows.isFollowing,
-    currentUser && user ? { followingId: user._id } : "skip"
+    currentUser && user ? { followingId: user._id } : "skip",
   );
 
   // Follow mutation
@@ -80,6 +80,16 @@ export default function ProfilePage({ params }) {
     }
   };
 
+  const totalViews = posts.reduce((sum, p) => sum + p.viewCount, 0);
+  const totalLikes = posts.reduce((sum, p) => sum + p.likeCount, 0);
+
+  const stats = [
+    { value: posts.length, label: "Posts" },
+    { value: followerCount || 0, label: "Followers" },
+    { value: totalViews.toLocaleString(), label: "Total Views" },
+    { value: totalLikes.toLocaleString(), label: "Total Likes" },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       {/* Header */}
@@ -111,7 +121,7 @@ export default function ProfilePage({ params }) {
           <p className="text-xl text-slate-400 mb-4">@{user.username}</p>
 
           {/* Follow Button */}
-          {!isOwnProfile && currentUser && (
+          {!isOwnProfile && !currentUser && (
             <Button
               onClick={handleFollowToggle}
               disabled={toggleFollow.isLoading}
@@ -143,33 +153,13 @@ export default function ProfilePage({ params }) {
         </div>
 
         {/* Stats */}
-        <div className="flex justify-center gap-8 mb-12">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">{posts.length}</div>
-            <div className="text-sm text-slate-400">Posts</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">
-              {followerCount || 0}
+        <div className="flex flex-wrap justify-center gap-8 mb-12">
+          {stats.map(({ value, label }) => (
+            <div key={label} className="text-center">
+              <div className="text-2xl font-bold text-white">{value}</div>
+              <div className="text-sm text-slate-400">{label}</div>
             </div>
-            <div className="text-sm text-slate-400">Followers</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">
-              {posts
-                .reduce((acc, post) => acc + post.viewCount, 0)
-                .toLocaleString()}
-            </div>
-            <div className="text-sm text-slate-400">Total Views</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-white">
-              {posts
-                .reduce((acc, post) => acc + post.likeCount, 0)
-                .toLocaleString()}
-            </div>
-            <div className="text-sm text-slate-400">Total Likes</div>
-          </div>
+          ))}
         </div>
 
         {/* Posts */}
