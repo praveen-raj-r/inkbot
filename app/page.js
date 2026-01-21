@@ -451,7 +451,7 @@ const Home = () => {
             {/* Left */}
             <p className="text-sm text-muted-foreground text-center sm:text-left">
               © {new Date().getFullYear()}{" "}
-              <span className="font-semibold text-foreground">Hostr</span> ✦
+              <span className="font-semibold text-foreground">Inkbot</span> ✦
               Built & Maintained by{" "}
               <span className="font-semibold text-foreground">Praveen Raj</span>
             </p>
