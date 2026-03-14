@@ -445,7 +445,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 bg-background">
+      <footer className="border-t relative border-white/10 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-6">
             {/* Left */}
