@@ -1,22 +1,14 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getCurrentUser } from "./lib/auth";
 
 // Toggle follow/unfollow a user
 export const toggleFollow = mutation({
   args: { followingId: v.id("users") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Must be logged in to follow users");
-    }
-
-    const follower = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const follower = await getCurrentUser(ctx);
     if (!follower) {
-      throw new Error("User not found");
+      throw new Error("Must be logged in to follow users");
     }
 
     // Can't follow yourself
@@ -55,16 +47,7 @@ export const toggleFollow = mutation({
 export const isFollowing = query({
   args: { followingId: v.optional(v.id("users")) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return false;
-    }
-
-    const follower = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const follower = await getCurrentUser(ctx);
     if (!follower) {
       return false;
     }
@@ -100,16 +83,7 @@ export const getFollowerCount = query({
 export const getMyFollowers = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    const currentUser = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const currentUser = await getCurrentUser(ctx);
     if (!currentUser) {
       return [];
     }
@@ -174,16 +148,7 @@ export const getMyFollowers = query({
 export const getMyFollowing = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    const currentUser = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const currentUser = await getCurrentUser(ctx);
     if (!currentUser) {
       return [];
     }

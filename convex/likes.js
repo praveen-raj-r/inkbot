@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getCurrentUser } from "./lib/auth";
 
 // Toggle like on a post
 export const toggleLike = mutation({
@@ -18,16 +19,8 @@ export const toggleLike = mutation({
 
     // If no userId provided, try to get from auth
     if (!userId) {
-      const identity = await ctx.auth.getUserIdentity();
-      if (identity) {
-        const user = await ctx.db
-          .query("users")
-          .filter((q) =>
-            q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier)
-          )
-          .unique();
-        userId = user?._id;
-      }
+      const user = await getCurrentUser(ctx);
+      userId = user?._id;
     }
 
     // Check if already liked
@@ -83,22 +76,10 @@ export const hasUserLiked = query({
 
     // If no userId provided, try to get from auth
     if (!userId) {
-      const identity = await ctx.auth.getUserIdentity();
-      if (!identity) {
-        return false;
-      }
-
-      const user = await ctx.db
-        .query("users")
-        .filter((q) =>
-          q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier)
-        )
-        .unique();
-
+      const user = await getCurrentUser(ctx);
       if (!user) {
         return false;
       }
-
       userId = user._id;
     }
 

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { getCurrentUser } from "./lib/auth";
 
 // Get feed posts - can improve it to show following posts first
 export const getFeed = query({
@@ -46,29 +47,19 @@ export const getFeed = query({
 export const getSuggestedUsers = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
     const limit = args.limit || 10;
 
-    let currentUser = null;
+    const currentUser = await getCurrentUser(ctx);
     let followedUserIds = [];
 
-    if (identity) {
-      currentUser = await ctx.db
-        .query("users")
-        .filter((q) =>
-          q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier)
-        )
-        .unique();
+    if (currentUser) {
+      // Get users already being followed
+      const follows = await ctx.db
+        .query("follows")
+        .filter((q) => q.eq(q.field("followerId"), currentUser._id))
+        .collect();
 
-      if (currentUser) {
-        // Get users already being followed
-        const follows = await ctx.db
-          .query("follows")
-          .filter((q) => q.eq(q.field("followerId"), currentUser._id))
-          .collect();
-
-        followedUserIds = follows.map((follow) => follow.followingId);
-      }
+      followedUserIds = follows.map((follow) => follow.followingId);
     }
 
     // Get users with recent posts who aren't being followed

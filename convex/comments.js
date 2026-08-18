@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
 
 // Add a comment to a post
 export const addComment = mutation({
@@ -8,18 +9,9 @@ export const addComment = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Must be logged in to comment");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const user = await getCurrentUser(ctx);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Must be logged in to comment");
     }
 
     const post = await ctx.db.get(args.postId);
@@ -88,19 +80,7 @@ export const getPostComments = query({
 export const deleteComment = mutation({
   args: { commentId: v.id("comments") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await getCurrentUserOrThrow(ctx);
 
     const comment = await ctx.db.get(args.commentId);
     if (!comment) {

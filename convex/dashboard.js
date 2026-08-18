@@ -1,20 +1,11 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
 
 // Get dashboard analytics for the authenticated user
 export const getAnalytics = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    // Get user from database
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const user = await getCurrentUser(ctx);
     if (!user) {
       return null;
     }
@@ -88,17 +79,7 @@ export const getAnalytics = query({
 export const getRecentActivity = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    // Get user from database
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const user = await getCurrentUser(ctx);
     if (!user) {
       return [];
     }
@@ -193,17 +174,7 @@ export const getRecentActivity = query({
 export const getPostsWithAnalytics = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    // Get user from database
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
+    const user = await getCurrentUser(ctx);
     if (!user) {
       return [];
     }
@@ -242,20 +213,7 @@ export const getPostsWithAnalytics = query({
 // Get daily views data for chart (last 30 days) - Assignment
 export const getDailyViews = query({
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Not authenticated");
-    }
-
-    // Get current user
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("tokenIdentifier"), identity.tokenIdentifier))
-      .unique();
-
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const user = await getCurrentUserOrThrow(ctx);
 
     // Get user's posts
     const userPosts = await ctx.db
