@@ -35,6 +35,10 @@ export const addComment = mutation({
       createdAt: Date.now(),
     });
 
+    await ctx.db.patch(args.postId, {
+      commentCount: (post.commentCount || 0) + 1,
+    });
+
     return commentId;
   },
 });
@@ -45,11 +49,8 @@ export const getPostComments = query({
   handler: async (ctx, args) => {
     const comments = await ctx.db
       .query("comments")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("postId"), args.postId),
-          q.eq(q.field("status"), "approved")
-        )
+      .withIndex("by_post_status", (q) =>
+        q.eq("postId", args.postId).eq("status", "approved")
       )
       .order("asc")
       .collect();
@@ -102,6 +103,13 @@ export const deleteComment = mutation({
     }
 
     await ctx.db.delete(args.commentId);
+
+    if (comment.status === "approved") {
+      await ctx.db.patch(comment.postId, {
+        commentCount: Math.max(0, (post.commentCount || 0) - 1),
+      });
+    }
+
     return { success: true };
   },
 });

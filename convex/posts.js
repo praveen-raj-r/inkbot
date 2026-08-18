@@ -76,6 +76,7 @@ export const createInternal = internalMutation({
       scheduledFor: args.scheduledFor,
       viewCount: 0,
       likeCount: 0,
+      commentCount: 0,
     });
 
     return postId;

@@ -44,6 +44,9 @@ export default defineSchema({
     // Analytics
     viewCount: v.number(),
     likeCount: v.number(),
+    // Optional (not required) so posts written before this field existed
+    // stay valid; back-filled by migrations.js, reads fall back to 0.
+    commentCount: v.optional(v.number()),
   })
     .index("by_author", ["authorId"])
     .index("by_status", ["status"])

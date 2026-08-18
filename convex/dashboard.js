@@ -25,23 +25,10 @@ export const getAnalytics = query({
     // Calculate analytics
     const totalViews = posts.reduce((sum, post) => sum + post.viewCount, 0);
     const totalLikes = posts.reduce((sum, post) => sum + post.likeCount, 0);
-
-    // Get comments count for user's posts
-    const postIds = posts.map((p) => p._id);
-    let totalComments = 0;
-
-    for (const postId of postIds) {
-      const comments = await ctx.db
-        .query("comments")
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("postId"), postId),
-            q.eq(q.field("status"), "approved")
-          )
-        )
-        .collect();
-      totalComments += comments.length;
-    }
+    const totalComments = posts.reduce(
+      (sum, post) => sum + (post.commentCount || 0),
+      0
+    );
 
     // Calculate growth percentages (simplified - you might want to implement proper date-based calculations)
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
@@ -179,34 +166,13 @@ export const getPostsWithAnalytics = query({
       return [];
     }
 
-    // Get recent posts with enhanced data
-    const posts = await ctx.db
+    // commentCount lives on the post document itself, so no per-post
+    // comment query is needed here.
+    return await ctx.db
       .query("posts")
       .filter((q) => q.eq(q.field("authorId"), user._id))
       .order("desc")
       .take(args.limit || 5);
-
-    // Add comment counts to each post
-    const postsWithComments = await Promise.all(
-      posts.map(async (post) => {
-        const comments = await ctx.db
-          .query("comments")
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("postId"), post._id),
-              q.eq(q.field("status"), "approved")
-            )
-          )
-          .collect();
-
-        return {
-          ...post,
-          commentCount: comments.length,
-        };
-      })
-    );
-
-    return postsWithComments;
   },
 });
 
