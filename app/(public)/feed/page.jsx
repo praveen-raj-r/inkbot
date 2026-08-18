@@ -12,6 +12,8 @@ import { useConvexQuery, useConvexMutation } from "@/hooks/use-convex-query";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import PostCard from "@/components/post-card";
+import LoadingState from "@/components/loading-state";
+import EmptyState from "@/components/empty-state";
 
 export default function FeedPage() {
   const { user: currentUser } = useUser();
@@ -135,30 +137,23 @@ export default function FeedPage() {
 
             {/* Posts Feed */}
             {isLoading ? (
-              <div className="flex justify-center py-12">
-                <div className="text-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-purple-400 mx-auto mb-4" />
-                  <p className="text-slate-400">Loading posts...</p>
-                </div>
-              </div>
+              <LoadingState message="Loading posts..." className="min-h-0 py-12" />
             ) : currentPosts.length === 0 ? (
               <Card className="card-glass">
-                <CardContent className="text-center py-12">
-                  <div className="space-y-4">
-                    <div className="text-6xl">📝</div>
-                    <div>
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        {activeTab === "trending"
-                          ? "No trending posts right now"
-                          : "No posts to show"}
-                      </h3>
-                      <p className="text-slate-400 mb-6">
-                        {activeTab === "trending"
-                          ? "Check back later for trending content"
-                          : "Follow some creators to see their posts here"}
-                      </p>
-                    </div>
-                  </div>
+                <CardContent className="py-12">
+                  <EmptyState
+                    icon={<span className="text-6xl">📝</span>}
+                    title={
+                      activeTab === "trending"
+                        ? "No trending posts right now"
+                        : "No posts to show"
+                    }
+                    description={
+                      activeTab === "trending"
+                        ? "Check back later for trending content"
+                        : "Follow some creators to see their posts here"
+                    }
+                  />
                 </CardContent>
               </Card>
             ) : (

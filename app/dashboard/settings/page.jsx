@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { User, Loader2, AlertCircle } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { useConvexQuery, useConvexMutation } from "@/hooks/use-convex-query";
+import LoadingState from "@/components/loading-state";
 import { toast } from "sonner";
 
 const usernameSchema = z.object({
@@ -94,14 +95,7 @@ export default function SettingsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-400 mx-auto" />
-          <p className="text-slate-400 mt-4">Loading settings...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Loading settings..." />;
   }
 
   return (

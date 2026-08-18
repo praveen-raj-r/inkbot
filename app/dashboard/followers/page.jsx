@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/convex/_generated/api";
 import { useConvexQuery, useConvexMutation } from "@/hooks/use-convex-query";
+import LoadingState from "@/components/loading-state";
 import { toast } from "sonner";
 
 const UserCard = ({
@@ -146,6 +147,10 @@ const FollowersPage = () => {
       variant: "following",
     },
   ];
+
+  if (followersLoading || followingLoading) {
+    return <LoadingState message="Loading connections..." />;
+  }
 
   return (
     <div className="space-y-6 p-4 lg:p-8">

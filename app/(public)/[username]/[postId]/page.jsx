@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BarLoader } from "react-spinners";
 import { cn } from "@/lib/utils";
 import DOMPurify from "dompurify";
+import LoadingState from "@/components/loading-state";
 
 const PostPage = ({ params }) => {
   const { username, postId } = use(params);
@@ -72,14 +73,7 @@ const PostPage = ({ params }) => {
   }, [postLoading]);
 
   if (postLoading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading post...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Loading post..." className="min-h-screen" />;
   }
 
   if (postError || !post) {

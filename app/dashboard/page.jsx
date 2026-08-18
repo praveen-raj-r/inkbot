@@ -26,6 +26,8 @@ import { api } from "@/convex/_generated/api";
 import { useConvexQuery } from "@/hooks/use-convex-query";
 import { formatDistanceToNow } from "date-fns";
 import DailyViewsChart from "@/components/daily-views-chart";
+import LoadingState from "@/components/loading-state";
+import EmptyState from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -52,14 +54,7 @@ export default function DashboardPage() {
 
   // Loading states
   if (analyticsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="text-center">
-          <Loader2 className="size-8 animate-spin text-purple-400 mx-auto" />
-          <p className="text-slate-400 mt-4">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Loading dashboard..." />;
   }
 
   // Default values if no data
@@ -192,15 +187,18 @@ export default function DashboardPage() {
                   <Loader2 className="size-6 animate-spin text-purple-400" />
                 </div>
               ) : !recentPosts || recentPosts.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-slate-400 mb-4">No posts yet</p>
-                  <Link href="/dashboard/create">
-                    <Button variant="outline" size="sm">
-                      <PlusCircle className="size-4 mr-2" />
-                      Create Your First Post
-                    </Button>
-                  </Link>
-                </div>
+                <EmptyState
+                  className="py-8"
+                  title="No posts yet"
+                  action={
+                    <Link href="/dashboard/create">
+                      <Button variant="outline" size="sm">
+                        <PlusCircle className="size-4 mr-2" />
+                        Create Your First Post
+                      </Button>
+                    </Link>
+                  }
+                />
               ) : (
                 <div className="space-y-4">
                   {recentPosts.map((post) => (
@@ -304,9 +302,7 @@ export default function DashboardPage() {
                   <Loader2 className="size-5 animate-spin text-purple-400" />
                 </div>
               ) : !recentActivity || recentActivity.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-slate-400">No recent activity</p>
-                </div>
+                <EmptyState className="py-8" title="No recent activity" />
               ) : (
                 <div className="space-y-4">
                   {recentActivity.map((activity, index) => (

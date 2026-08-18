@@ -12,6 +12,8 @@ import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import PostCard from "@/components/post-card";
 import PublicHeader from "./_components/public-header";
+import LoadingState from "@/components/loading-state";
+import EmptyState from "@/components/empty-state";
 
 export default function ProfilePage({ params }) {
   const { username } =  use(params);
@@ -49,14 +51,7 @@ export default function ProfilePage({ params }) {
   const toggleFollow = useConvexMutation(api.follows.toggleFollow);
 
   if (userLoading || postsLoading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-slate-400">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState message="Loading profile..." className="min-h-screen" />;
   }
 
   if (userError || !user) {
@@ -168,11 +163,11 @@ export default function ProfilePage({ params }) {
 
           {posts.length === 0 ? (
             <Card className="card-glass">
-              <CardContent className="text-center py-12">
-                <p className="text-slate-400 text-lg">No posts yet</p>
-                <p className="text-slate-500 text-sm mt-2">
-                  Check back later for new content!
-                </p>
+              <CardContent className="py-12">
+                <EmptyState
+                  title="No posts yet"
+                  description="Check back later for new content!"
+                />
               </CardContent>
             </Card>
           ) : (
