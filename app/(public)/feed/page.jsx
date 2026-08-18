@@ -39,8 +39,24 @@ export default function FeedPage() {
     { limit: 15 },
   );
 
-  // Mutations
-  const toggleFollow = useConvexMutation(api.follows.toggleFollow);
+  // Mutations. getSuggestedUsers only ever shows not-yet-followed users, so
+  // a toggle here always means "follow" — remove them from the suggestion
+  // list immediately instead of waiting on the round-trip.
+  const toggleFollow = useConvexMutation(
+    api.follows.toggleFollow,
+    (localStore, args) => {
+      const suggestions = localStore.getQuery(api.feed.getSuggestedUsers, {
+        limit: 6,
+      });
+      if (suggestions !== undefined) {
+        localStore.setQuery(
+          api.feed.getSuggestedUsers,
+          { limit: 6 },
+          suggestions.filter((user) => user._id !== args.followingId),
+        );
+      }
+    },
+  );
 
   // Handle follow/unfollow
   const handleFollowToggle = async (userId) => {

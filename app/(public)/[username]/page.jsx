@@ -48,7 +48,32 @@ export default function ProfilePage({ params }) {
   );
 
   // Follow mutation
-  const toggleFollow = useConvexMutation(api.follows.toggleFollow);
+  const toggleFollow = useConvexMutation(
+    api.follows.toggleFollow,
+    (localStore, args) => {
+      const currentlyFollowing = localStore.getQuery(api.follows.isFollowing, {
+        followingId: args.followingId,
+      });
+      if (currentlyFollowing !== undefined) {
+        localStore.setQuery(
+          api.follows.isFollowing,
+          { followingId: args.followingId },
+          !currentlyFollowing,
+        );
+      }
+
+      const count = localStore.getQuery(api.follows.getFollowerCount, {
+        userId: args.followingId,
+      });
+      if (count !== undefined) {
+        localStore.setQuery(
+          api.follows.getFollowerCount,
+          { userId: args.followingId },
+          count + (currentlyFollowing ? -1 : 1),
+        );
+      }
+    },
+  );
 
   if (userLoading || postsLoading) {
     return <LoadingState message="Loading profile..." className="min-h-screen" />;
@@ -116,7 +141,7 @@ export default function ProfilePage({ params }) {
           <p className="text-xl text-slate-400 mb-4">@{user.username}</p>
 
           {/* Follow Button */}
-          {!isOwnProfile && !currentUser && (
+          {!isOwnProfile && currentUser && (
             <Button
               onClick={handleFollowToggle}
               disabled={toggleFollow.isLoading}

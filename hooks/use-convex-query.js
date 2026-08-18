@@ -32,8 +32,15 @@ export const useConvexQuery = (query, ...args) => {
   };
 };
 
-export const useConvexMutation = (mutation) => {
-  const mutationFn = useMutation(mutation);
+// Pass `optimisticUpdate` (localStore, args) => void to update Convex's
+// local query cache immediately, before the server round-trip resolves —
+// see https://docs.convex.dev/client/react/optimistic-updates. The real
+// server result reconciles (and overwrites) it once the mutation lands.
+export const useConvexMutation = (mutation, optimisticUpdate) => {
+  let mutationFn = useMutation(mutation);
+  if (optimisticUpdate) {
+    mutationFn = mutationFn.withOptimisticUpdate(optimisticUpdate);
+  }
   const [data, setData] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

@@ -55,12 +55,87 @@ const PostPage = ({ params }) => {
     currentUser ? { postId } : "skip",
   );
 
-  const toggleLike = useConvexMutation(api.likes.toggleLike);
+  const toggleLike = useConvexMutation(
+    api.likes.toggleLike,
+    (localStore, args) => {
+      const currentlyLiked = localStore.getQuery(api.likes.hasUserLiked, {
+        postId: args.postId,
+      });
+      if (currentlyLiked !== undefined) {
+        localStore.setQuery(
+          api.likes.hasUserLiked,
+          { postId: args.postId },
+          !currentlyLiked,
+        );
+      }
+
+      const cachedPost = localStore.getQuery(api.public.getPublishedPost, {
+        username,
+        postId,
+      });
+      if (cachedPost) {
+        localStore.setQuery(
+          api.public.getPublishedPost,
+          { username, postId },
+          {
+            ...cachedPost,
+            likeCount: cachedPost.likeCount + (currentlyLiked ? -1 : 1),
+          },
+        );
+      }
+    },
+  );
 
   const { mutate: addComment, isLoading: isSubmittingComment } =
-    useConvexMutation(api.comments.addComment);
+    useConvexMutation(api.comments.addComment, (localStore, args) => {
+      if (!currentConvexUser) return;
 
-  const deleteComment = useConvexMutation(api.comments.deleteComment);
+      const existing = localStore.getQuery(api.comments.getPostComments, {
+        postId: args.postId,
+      });
+      if (existing === undefined) return;
+
+      localStore.setQuery(
+        api.comments.getPostComments,
+        { postId: args.postId },
+        [
+          ...existing,
+          {
+            _id: crypto.randomUUID(),
+            _creationTime: Date.now(),
+            postId: args.postId,
+            authorId: currentConvexUser._id,
+            authorName: currentConvexUser.name,
+            authorEmail: currentConvexUser.email,
+            content: args.content,
+            status: "approved",
+            createdAt: Date.now(),
+            author: {
+              _id: currentConvexUser._id,
+              name: currentConvexUser.name,
+              username: currentConvexUser.username,
+              imageUrl: currentConvexUser.imageUrl,
+            },
+          },
+        ],
+      );
+    });
+
+  const deleteComment = useConvexMutation(
+    api.comments.deleteComment,
+    (localStore, args) => {
+      const existing = localStore.getQuery(api.comments.getPostComments, {
+        postId,
+      });
+      if (existing === undefined) return;
+
+      localStore.setQuery(
+        api.comments.getPostComments,
+        { postId },
+        existing.filter((comment) => comment._id !== args.commentId),
+      );
+    },
+  );
 
   const incrementView = useConvexMutation(api.public.incrementViewCount);
 

@@ -107,9 +107,43 @@ const FollowersPage = () => {
     { limit: 100 },
   );
 
-  // Mutations
+  // Mutations. This one button drives both "Follow back" (followers tab)
+  // and "Unfollow" (following tab), so the update covers both caches:
+  // - Follow back only ever turns followsBack on, never off (the button
+  //   only renders when it's already false), so it's safe to set rather
+  //   than toggle.
+  // - Unfollow removes the user from the following list outright.
   const { mutate: toggleFollow, isLoading: isToggling } = useConvexMutation(
     api.follows.toggleFollow,
+    (localStore, args) => {
+      const { followingId } = args;
+
+      const followersList = localStore.getQuery(api.follows.getMyFollowers, {
+        limit: 100,
+      });
+      if (followersList !== undefined) {
+        localStore.setQuery(
+          api.follows.getMyFollowers,
+          { limit: 100 },
+          followersList.map((follower) =>
+            follower._id === followingId
+              ? { ...follower, followsBack: true }
+              : follower,
+          ),
+        );
+      }
+
+      const followingList = localStore.getQuery(api.follows.getMyFollowing, {
+        limit: 100,
+      });
+      if (followingList !== undefined) {
+        localStore.setQuery(
+          api.follows.getMyFollowing,
+          { limit: 100 },
+          followingList.filter((user) => user._id !== followingId),
+        );
+      }
+    },
   );
 
   // Handle follow/unfollow
