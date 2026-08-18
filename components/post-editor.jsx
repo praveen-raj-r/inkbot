@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -58,20 +58,6 @@ export default function PostEditor({
 
   const { handleSubmit, watch, setValue } = form;
   const watchedValues = watch();
-
-  // Auto-save for drafts
-  useEffect(() => {
-    if (!watchedValues.title && !watchedValues.content) return;
-
-    const autoSave = setInterval(() => {
-      if (watchedValues.title || watchedValues.content) {
-        if (mode === "create") handleSave(true); // Silent save
-      }
-    }, 30000);
-
-    return () => clearInterval(autoSave);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watchedValues.title, watchedValues.content]);
 
   // Handle image selection
   const handleImageSelect = (imageData) => {
@@ -141,6 +127,35 @@ export default function PostEditor({
   const handleSave = (silent = false) => {
     handleSubmit((data) => onSubmit(data, "draft", silent))();
   };
+
+  // Always points at the latest handleSave, so the autosave interval
+  // below can call the current one without needing to be torn down and
+  // recreated whenever the form changes.
+  const handleSaveRef = useRef(null);
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
+  });
+
+  // Auto-save drafts every 30s. The interval is created once, on mount,
+  // instead of being keyed to [watchedValues.title, watchedValues.content]:
+  // watch() produces a new value on every keystroke, so that dependency
+  // array tore the interval down and recreated it on every character
+  // typed — meaning the 30s timer almost never survived long enough to
+  // fire while someone was actively writing. Reading form.getValues()
+  // inside the interval instead means it always sees the latest content
+  // without needing to be recreated.
+  useEffect(() => {
+    if (mode !== "create") return;
+
+    const autoSave = setInterval(() => {
+      const { title, content } = form.getValues();
+      if (title || content) {
+        handleSaveRef.current(true); // Silent save
+      }
+    }, 30000);
+
+    return () => clearInterval(autoSave);
+  }, [mode, form]);
 
   const handlePublish = () => {
     handleSubmit((data) => onSubmit(data, "publish"))();
