@@ -12,7 +12,7 @@ const PublicHeader = ({ link, title }) => {
           <Button
             variant="ghost"
             size="sm"
-            className="-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             {title}

@@ -127,7 +127,7 @@ const FollowersPage = () => {
     return (users || []).filter(
       (user) =>
         user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.username.toLowerCase().includes(searchQuery.toLowerCase()),
+        user.username?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   };
 
@@ -171,7 +171,7 @@ const FollowersPage = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="followers">
-        <TabsList className="grid w-  grid-cols-2 bg-slate-900 border h-10">
+        <TabsList className="grid w-full grid-cols-2 bg-slate-900 border h-10">
           <TabsTrigger value="followers">
             Followers ({filteredFollowers.length})
           </TabsTrigger>
