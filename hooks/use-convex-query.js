@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -44,6 +44,34 @@ export const useConvexMutation = (mutation) => {
 
     try {
       const response = await mutationFn(...args);
+      setData(response);
+      return response;
+    } catch (err) {
+      setError(err);
+      toast.error(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { mutate, data, isLoading, error };
+};
+
+// Same shape as useConvexMutation, backed by a Convex action instead of a
+// mutation (e.g. an action that needs Node APIs, like postActions.create).
+export const useConvexAction = (action) => {
+  const actionFn = useAction(action);
+  const [data, setData] = useState(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const mutate = async (...args) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await actionFn(...args);
       setData(response);
       return response;
     } catch (err) {

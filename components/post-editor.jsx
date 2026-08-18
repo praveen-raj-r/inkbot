@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
-import { useConvexMutation } from "@/hooks/use-convex-query";
+import { useConvexAction } from "@/hooks/use-convex-query";
 import PostEditorHeader from "./post-editor-header";
 import PostEditorContent from "./post-editor-content";
 import PostEditorSettings from "./post-editor-settings";
@@ -32,12 +32,13 @@ export default function PostEditor({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [quillRef, setQuillRef] = useState(null);
 
-  // Mutations with built-in loading states
-  const { mutate: createPost, isLoading: isCreateLoading } = useConvexMutation(
-    api.posts.create
+  // Create/update run as actions so post content can be sanitized
+  // server-side before it's written (see convex/postActions.js).
+  const { mutate: createPost, isLoading: isCreateLoading } = useConvexAction(
+    api.postActions.create
   );
-  const { mutate: updatePost, isLoading: isUpdating } = useConvexMutation(
-    api.posts.update
+  const { mutate: updatePost, isLoading: isUpdating } = useConvexAction(
+    api.postActions.update
   );
 
   // Form setup

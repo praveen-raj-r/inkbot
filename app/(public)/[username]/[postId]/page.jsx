@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { BarLoader } from "react-spinners";
 import { cn } from "@/lib/utils";
+import DOMPurify from "dompurify";
 
 const PostPage = ({ params }) => {
   const { username, postId } = use(params);
@@ -228,9 +229,13 @@ const PostPage = ({ params }) => {
           </div>
 
           {/* Post Content */}
+          {/* content is sanitized server-side on save (convex/postActions.js);
+              sanitizing again here is defense in depth before it hits the DOM. */}
           <div
             className="prose prose-lg max-w-none prose-invert prose-purple"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content),
+            }}
           />
 
           <div className="flex items-center gap-6 pt-4 border-t border-slate-800">

@@ -1,9 +1,11 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
 
-// Create a new post
-export const create = mutation({
+// Not reachable from the client directly — convex/postActions.js sanitizes
+// `content` (which needs Node's fs via sanitize-html/postcss, so it has to
+// run in a "use node" action) and then calls this to do the actual write.
+export const createInternal = internalMutation({
   args: {
     title: v.string(),
     content: v.string(),
@@ -80,8 +82,8 @@ export const create = mutation({
   },
 });
 
-// Update an existing post
-export const update = mutation({
+// Not reachable from the client directly — see createInternal above.
+export const updateInternal = internalMutation({
   args: {
     id: v.id("posts"),
     title: v.optional(v.string()),
