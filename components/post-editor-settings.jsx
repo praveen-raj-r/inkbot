@@ -33,7 +33,15 @@ const CATEGORIES = [
   "Entertainment",
 ];
 
-export default function PostEditorSettings({ isOpen, onClose, form, mode }) {
+export default function PostEditorSettings({
+  isOpen,
+  onClose,
+  form,
+  mode,
+  canUnschedule = false,
+  onUnschedule,
+  isUnscheduling = false,
+}) {
   const [tagInput, setTagInput] = useState("");
   const { watch, setValue } = form;
   const watchedValues = watch();
@@ -140,6 +148,31 @@ export default function PostEditorSettings({ isOpen, onClose, form, mode }) {
               {watchedValues.tags.length}/10 tags • Press Enter or comma to add
             </p>
           </div>
+
+          {/* Pending schedule (edit mode): show it and allow cancelling */}
+          {canUnschedule && watchedValues.scheduledFor && (
+            <div className="space-y-2">
+              <label className="text-white text-sm font-medium">
+                Scheduled Publication
+              </label>
+              <p className="text-sm text-slate-300">
+                Publishes on{" "}
+                {new Date(watchedValues.scheduledFor).toLocaleString()}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isUnscheduling}
+                onClick={onUnschedule}
+              >
+                Unschedule
+              </Button>
+              <p className="text-xs text-slate-400">
+                The post will stay a draft until you publish it.
+              </p>
+            </div>
+          )}
 
           {/* Scheduling */}
           {mode === "create" && (

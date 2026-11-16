@@ -98,6 +98,8 @@ export const updateInternal = internalMutation({
     category: v.optional(v.string()),
     featuredImage: v.optional(v.string()),
     scheduledFor: v.optional(v.number()),
+    // Cancel a pending schedule; the post stays a plain draft.
+    clearSchedule: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUserOrThrow(ctx);
@@ -127,6 +129,10 @@ export const updateInternal = internalMutation({
       updateData.featuredImage = args.featuredImage;
     if (args.scheduledFor !== undefined)
       updateData.scheduledFor = args.scheduledFor;
+
+    if (args.clearSchedule && post.status === "draft") {
+      updateData.scheduledFor = undefined;
+    }
 
     // Handle status change
     if (args.status !== undefined) {

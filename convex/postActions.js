@@ -76,6 +76,7 @@ export const update = action({
     category: v.optional(v.string()),
     featuredImage: v.optional(v.string()),
     scheduledFor: v.optional(v.number()),
+    clearSchedule: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     validatePost(args);

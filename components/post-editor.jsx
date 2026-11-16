@@ -169,6 +169,17 @@ export default function PostEditor({
     handleSubmit((data) => onSubmit(data, "publish"))();
   };
 
+  const handleUnschedule = async () => {
+    if (!initialData?._id) return;
+    try {
+      await updatePost({ id: initialData._id, clearSchedule: true });
+      form.setValue("scheduledFor", "");
+      toast.success("Schedule removed. The post is now a draft.");
+    } catch (error) {
+      toast.error(error.message || "Failed to unschedule");
+    }
+  };
+
   const handleSchedule = () => {
     if (!watchedValues.scheduledFor) {
       toast.error("Please select a date and time to schedule");
@@ -204,6 +215,9 @@ export default function PostEditor({
         onClose={() => setIsSettingsOpen(false)}
         form={form}
         mode={mode}
+        canUnschedule={mode === "edit" && initialData?.status === "draft"}
+        onUnschedule={handleUnschedule}
+        isUnscheduling={isUpdating}
       />
 
       <ImageUploadModal
