@@ -33,19 +33,49 @@ export const getAnalytics = query({
     // Calculate growth percentages (simplified - you might want to implement proper date-based calculations)
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
-    const recentPosts = posts.filter((p) => p.createdAt > thirtyDaysAgo);
-    const recentViews = recentPosts.reduce(
-      (sum, post) => sum + post.viewCount,
-      0
-    );
-    const recentLikes = recentPosts.reduce(
-      (sum, post) => sum + post.likeCount,
-      0
+    const sixtyDaysAgo = Date.now() - 60 * 24 * 60 * 60 * 1000;
+    const dateKey = (ms) => new Date(ms).toISOString().split("T")[0];
+    const cutoff30 = dateKey(thirtyDaysAgo);
+    const cutoff60 = dateKey(sixtyDaysAgo);
+
+    // Views: last 30 days vs the 30 days before, from daily stats.
+    let viewsNow = 0;
+    let viewsPrev = 0;
+    // Likes: same windows, from each like createdAt.
+    let likesNow = 0;
+    let likesPrev = 0;
+
+    await Promise.all(
+      posts.map(async (post) => {
+        const [stats, likes] = await Promise.all([
+          ctx.db
+            .query("dailyStats")
+            .withIndex("by_post_date", (q) =>
+              q.eq("postId", post._id).gte("date", cutoff60)
+            )
+            .collect(),
+          ctx.db
+            .query("likes")
+            .withIndex("by_post", (q) => q.eq("postId", post._id))
+            .collect(),
+        ]);
+        for (const s of stats) {
+          if (s.date >= cutoff30) viewsNow += s.views;
+          else viewsPrev += s.views;
+        }
+        for (const l of likes) {
+          if (l.createdAt >= thirtyDaysAgo) likesNow++;
+          else if (l.createdAt >= sixtyDaysAgo) likesPrev++;
+        }
+      })
     );
 
-    // Simple growth calculation (you can enhance this)
-    const viewsGrowth = totalViews > 0 ? (recentViews / totalViews) * 100 : 0;
-    const likesGrowth = totalLikes > 0 ? (recentLikes / totalLikes) * 100 : 0;
+    // Percent change vs the previous 30 days. With no previous activity,
+    // any new activity counts as +100%; a drop shows as 0 (badge hidden).
+    const pctChange = (now, prev) =>
+      prev > 0 ? ((now - prev) / prev) * 100 : now > 0 ? 100 : 0;
+    const viewsGrowth = Math.max(0, pctChange(viewsNow, viewsPrev));
+    const likesGrowth = Math.max(0, pctChange(likesNow, likesPrev));
     // No per-comment history is aggregated here, so don't invent a number.
     const commentsGrowth = 0;
     // Followers gained in the last 30 days as a share of all followers.

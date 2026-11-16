@@ -2,6 +2,11 @@ import { v } from "convex/values";
 import { mutation, query, internalMutation } from "./_generated/server";
 import { getCurrentUser, getCurrentUserOrThrow } from "./lib/auth";
 
+// A scheduled post is a draft with a future scheduledFor; the cron in
+// convex/crons.js publishes it once that time passes. A publish request that
+// carries a future date is treated as scheduling, never as publishing now.
+const isFuture = (ts, now) => ts !== undefined && ts > now;
+
 // Not reachable from the client directly — convex/postActions.js sanitizes
 // `content` (which needs Node's fs via sanitize-html/postcss, so it has to
 // run in a "use node" action) and then calls this to do the actual write.
@@ -24,9 +29,11 @@ export const createInternal = internalMutation({
       .withIndex("by_author_status", (q) =>
         q.eq("authorId", user._id).eq("status", "draft")
       )
+      .filter((q) => q.eq(q.field("scheduledFor"), undefined))
       .first();
 
     const now = Date.now();
+    if (isFuture(args.scheduledFor, now)) args = { ...args, status: "draft" };
 
     // If publishing and we have an existing draft, update it to published
     if (args.status === "published" && existingDraft) {
@@ -39,7 +46,7 @@ export const createInternal = internalMutation({
         featuredImage: args.featuredImage,
         updatedAt: now,
         publishedAt: now,
-        scheduledFor: args.scheduledFor,
+        scheduledFor: undefined,
       });
       return existingDraft._id;
     }
@@ -70,7 +77,7 @@ export const createInternal = internalMutation({
       createdAt: now,
       updatedAt: now,
       publishedAt: args.status === "published" ? now : undefined,
-      scheduledFor: args.scheduledFor,
+      scheduledFor: args.status === "published" ? undefined : args.scheduledFor,
       viewCount: 0,
       likeCount: 0,
       commentCount: 0,
@@ -125,14 +132,43 @@ export const updateInternal = internalMutation({
     if (args.status !== undefined) {
       updateData.status = args.status;
 
+      // Future date + publish means schedule it, not publish now.
+      if (args.status === "published" && isFuture(args.scheduledFor, now)) {
+        updateData.status = "draft";
+      } else if (args.status === "published") {
+        updateData.scheduledFor = undefined;
+      }
+
       // If publishing for the first time
-      if (args.status === "published" && post.status === "draft") {
+      if (updateData.status === "published" && post.status === "draft") {
         updateData.publishedAt = now;
       }
     }
 
     await ctx.db.patch(args.id, updateData);
     return args.id;
+  },
+});
+
+// Publishes scheduled posts whose time has come. Called by convex/crons.js.
+export const publishDueScheduled = internalMutation({
+  handler: async (ctx) => {
+    const now = Date.now();
+    const due = await ctx.db
+      .query("posts")
+      .withIndex("by_scheduled", (q) =>
+        q.eq("status", "draft").gt("scheduledFor", 0).lte("scheduledFor", now)
+      )
+      .take(100);
+
+    for (const post of due) {
+      await ctx.db.patch(post._id, {
+        status: "published",
+        publishedAt: now,
+        updatedAt: now,
+      });
+    }
+    return { published: due.length };
   },
 });
 
@@ -149,6 +185,7 @@ export const getUserDraft = query({
       .withIndex("by_author_status", (q) =>
         q.eq("authorId", user._id).eq("status", "draft")
       )
+      .filter((q) => q.eq(q.field("scheduledFor"), undefined))
       .first();
 
     return draft;

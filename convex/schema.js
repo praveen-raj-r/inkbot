@@ -52,6 +52,7 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_published", ["status", "publishedAt"])
     .index("by_author_status", ["authorId", "status"])
+    .index("by_scheduled", ["status", "scheduledFor"])
     .searchIndex("search_content", { searchField: "title" }),
 
   // Comments system

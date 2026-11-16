@@ -52,6 +52,14 @@ const PostCard = ({
         label: "Published",
       };
     }
+    // A draft with a future date is a scheduled post.
+    if (post.scheduledFor && post.scheduledFor > now) {
+      return {
+        variant: "secondary",
+        className: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+        label: "Scheduled",
+      };
+    }
     return {
       variant: "outline",
       className: "bg-orange-500/20 text-orange-300 border-orange-500/30",

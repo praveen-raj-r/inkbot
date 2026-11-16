@@ -30,6 +30,12 @@ import LoadingState from "@/components/loading-state";
 import EmptyState from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 
+// Scheduled = a draft whose publish time is still in the future.
+const isScheduled = (post) =>
+  post.status === "draft" &&
+  post.scheduledFor &&
+  post.scheduledFor > Date.now();
+
 export default function DashboardPage() {
   // Fetch real data
   const { data: analytics, isLoading: analyticsLoading } = useConvexQuery(
@@ -223,29 +229,27 @@ export default function DashboardPage() {
                             variant={
                               post.status === "published"
                                 ? "default"
-                                : post.status === "scheduled"
+                                : isScheduled(post)
                                   ? "secondary"
                                   : "outline"
                             }
                             className={
                               post.status === "published"
                                 ? "bg-green-500/20 text-green-300 border-green-500/30"
-                                : post.status === "scheduled"
+                                : isScheduled(post)
                                   ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
                                   : "bg-orange-500/20 text-orange-300 border-orange-500/30"
                             }
                           >
-                            {post.status}
+                            {isScheduled(post) ? "scheduled" : post.status}
                           </Badge>
 
                           <span className="text-xs sm:text-sm text-slate-400 whitespace-nowrap">
                             {post.status === "published" && post.publishedAt
                               ? `Published ${formatTime(post.publishedAt)}`
-                              : post.status === "draft"
-                                ? `Updated ${formatTime(post.updatedAt)}`
-                                : post.scheduledFor
-                                  ? `Scheduled for ${new Date(post.scheduledFor).toLocaleDateString()}`
-                                  : `Updated ${formatTime(post.updatedAt)}`}
+                              : isScheduled(post)
+                                ? `Scheduled for ${new Date(post.scheduledFor).toLocaleString()}`
+                                : `Updated ${formatTime(post.updatedAt)}`}
                           </span>
                         </div>
                       </div>

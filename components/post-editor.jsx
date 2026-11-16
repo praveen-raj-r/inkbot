@@ -86,9 +86,12 @@ export default function PostEditor({
         tags: data.tags,
         featuredImage: data.featuredImage || undefined,
         status: action === "publish" ? "published" : "draft",
-        scheduledFor: data.scheduledFor
-          ? new Date(data.scheduledFor).getTime()
-          : undefined,
+        // Only an explicit Schedule carries a date; publishing or
+        // autosaving a draft must never schedule (or auto-publish) a post.
+        scheduledFor:
+          action === "schedule" && data.scheduledFor
+            ? new Date(data.scheduledFor).getTime()
+            : undefined,
       };
 
       let resultId;
@@ -112,9 +115,14 @@ export default function PostEditor({
 
       if (!silent) {
         const message =
-          action === "publish" ? "Post published!" : "Draft saved!";
+          action === "publish"
+            ? "Post published!"
+            : action === "schedule"
+              ? "Post scheduled!"
+              : "Draft saved!";
         toast.success(message);
-        if (action === "publish") router.push("/dashboard/posts");
+        if (action === "publish" || action === "schedule")
+          router.push("/dashboard/posts");
       }
 
       return resultId;

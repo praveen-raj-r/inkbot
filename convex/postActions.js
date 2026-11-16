@@ -31,6 +31,8 @@ function validatePost(args) {
     if (args.tags.some((t) => t.length > MAX_TAG_LENGTH))
       throw new Error(`Tags must be at most ${MAX_TAG_LENGTH} characters`);
   }
+  if (args.scheduledFor !== undefined && args.scheduledFor < Date.now() - 60000)
+    throw new Error("Scheduled time must be in the future");
   if (args.category !== undefined && args.category.length > MAX_CATEGORY)
     throw new Error("Category is too long");
   if (args.featuredImage) {
