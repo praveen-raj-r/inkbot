@@ -101,6 +101,17 @@ export default function PostEditorHeader({
           )}
 
           {isEdit ? (
+            <>
+            {isDraft && (
+              <Button
+                variant="outline"
+                disabled={isPublishing}
+                onClick={onSchedule}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Schedule
+              </Button>
+            )}
             <Button
               variant={"primary"}
               disabled={isPublishing}
@@ -114,8 +125,9 @@ export default function PostEditorHeader({
               ) : (
                 <Send className="h-4 w-4 mr-2" />
               )}
-              Update
+              {isDraft ? "Publish now" : "Update"}
             </Button>
+            </>
           ) : (
             <DropdownMenu
               open={isPublishMenuOpen}

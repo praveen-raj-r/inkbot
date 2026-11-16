@@ -30,6 +30,7 @@ export default function PostsPage() {
   // Data fetching
   const { data: posts, isLoading } = useConvexQuery(api.posts.getUserPosts);
   const deletePost = useConvexMutation(api.posts.deletePost);
+  const unschedulePost = useConvexMutation(api.posts.unschedule);
 
   // Filter and sort posts
   const filteredPosts = useMemo(() => {
@@ -84,6 +85,15 @@ export default function PostsPage() {
       toast.success("Post deleted successfully");
     } catch (error) {
       toast.error("Failed to delete post");
+    }
+  };
+
+  const handleUnschedulePost = async (post) => {
+    try {
+      await unschedulePost.mutate({ id: post._id });
+      toast.success("Schedule removed. The post is now a draft.");
+    } catch (error) {
+      toast.error("Failed to unschedule post");
     }
   };
 
@@ -201,6 +211,7 @@ export default function PostsPage() {
               onEdit={handleEditPost}
               onDelete={handleDeletePost}
               onDuplicate={handleDuplicatePost}
+              onUnschedule={handleUnschedulePost}
             />
           ))}
         </div>

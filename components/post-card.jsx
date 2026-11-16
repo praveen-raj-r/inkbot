@@ -14,6 +14,7 @@ import {
   Trash2,
   ExternalLink,
   Copy,
+  CalendarX,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const PostCard = ({
   onEdit,
   onDelete,
   onDuplicate,
+  onUnschedule,
   className = "",
 }) => {
   // Get status badge configuration
@@ -160,6 +162,15 @@ const PostCard = ({
                       Duplicate
                     </DropdownMenuItem>
                   )}
+                  {onUnschedule &&
+                    post.status === "draft" &&
+                    post.scheduledFor &&
+                    post.scheduledFor > now && (
+                      <DropdownMenuItem onClick={() => onUnschedule(post)}>
+                        <CalendarX className="size-4 mr-2" />
+                        Unschedule
+                      </DropdownMenuItem>
+                    )}
                   {onDelete && (
                     <>
                       <DropdownMenuSeparator />

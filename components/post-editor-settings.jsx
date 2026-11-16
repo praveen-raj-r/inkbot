@@ -149,33 +149,8 @@ export default function PostEditorSettings({
             </p>
           </div>
 
-          {/* Pending schedule (edit mode): show it and allow cancelling */}
-          {canUnschedule && watchedValues.scheduledFor && (
-            <div className="space-y-2">
-              <label className="text-white text-sm font-medium">
-                Scheduled Publication
-              </label>
-              <p className="text-sm text-slate-300">
-                Publishes on{" "}
-                {new Date(watchedValues.scheduledFor).toLocaleString()}
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isUnscheduling}
-                onClick={onUnschedule}
-              >
-                Unschedule
-              </Button>
-              <p className="text-xs text-slate-400">
-                The post will stay a draft until you publish it.
-              </p>
-            </div>
-          )}
-
-          {/* Scheduling */}
-          {mode === "create" && (
+          {/* Scheduling: new posts, and drafts being edited */}
+          {(mode === "create" || canUnschedule) && (
             <div className="space-y-2">
               <label className="text-white text-sm font-medium">
                 Schedule Publication
@@ -188,8 +163,21 @@ export default function PostEditorSettings({
                 min={new Date().toISOString().slice(0, 16)}
               />
               <p className="text-xs text-slate-400">
-                Leave empty to publish immediately
+                {canUnschedule
+                  ? "Pick a new time, then use Schedule in the header."
+                  : "Leave empty to publish immediately"}
               </p>
+              {canUnschedule && watchedValues.scheduledFor && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isUnscheduling}
+                  onClick={onUnschedule}
+                >
+                  Unschedule
+                </Button>
+              )}
             </div>
           )}
         </div>

@@ -178,6 +178,28 @@ export const publishDueScheduled = internalMutation({
   },
 });
 
+// Cancel a pending schedule; the post stays a draft.
+export const unschedule = mutation({
+  args: { id: v.id("posts") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUserOrThrow(ctx);
+    const post = await ctx.db.get(args.id);
+    if (!post) throw new Error("Post not found");
+    if (post.authorId !== user._id) {
+      throw new Error("Not authorized to update this post");
+    }
+    if (post.status !== "draft") {
+      throw new Error("Only scheduled drafts can be unscheduled");
+    }
+
+    await ctx.db.patch(args.id, {
+      scheduledFor: undefined,
+      updatedAt: Date.now(),
+    });
+    return { success: true };
+  },
+});
+
 // Get user's draft (there should only be one)
 export const getUserDraft = query({
   handler: async (ctx) => {
