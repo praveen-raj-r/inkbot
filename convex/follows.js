@@ -19,11 +19,8 @@ export const toggleFollow = mutation({
     // Check if already following
     const existingFollow = await ctx.db
       .query("follows")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("followerId"), follower._id),
-          q.eq(q.field("followingId"), args.followingId)
-        )
+      .withIndex("by_relationship", (q) =>
+        q.eq("followerId", follower._id).eq("followingId", args.followingId)
       )
       .unique();
 
@@ -54,11 +51,8 @@ export const isFollowing = query({
 
     const follow = await ctx.db
       .query("follows")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("followerId"), follower._id),
-          q.eq(q.field("followingId"), args.followingId)
-        )
+      .withIndex("by_relationship", (q) =>
+        q.eq("followerId", follower._id).eq("followingId", args.followingId)
       )
       .unique();
 
@@ -72,7 +66,7 @@ export const getFollowerCount = query({
   handler: async (ctx, args) => {
     const follows = await ctx.db
       .query("follows")
-      .filter((q) => q.eq(q.field("followingId"), args.userId))
+      .withIndex("by_following", (q) => q.eq("followingId", args.userId))
       .collect();
 
     return follows.length;
@@ -93,7 +87,7 @@ export const getMyFollowers = query({
     // Get followers
     const follows = await ctx.db
       .query("follows")
-      .filter((q) => q.eq(q.field("followingId"), currentUser._id))
+      .withIndex("by_following", (q) => q.eq("followingId", currentUser._id))
       .order("desc")
       .take(limit);
 
@@ -106,22 +100,16 @@ export const getMyFollowers = query({
         // Check if current user follows them back
         const followsBack = await ctx.db
           .query("follows")
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("followerId"), currentUser._id),
-              q.eq(q.field("followingId"), user._id)
-            )
+          .withIndex("by_relationship", (q) =>
+            q.eq("followerId", currentUser._id).eq("followingId", user._id)
           )
           .unique();
 
         // Get recent posts count
         const recentPosts = await ctx.db
           .query("posts")
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("authorId"), user._id),
-              q.eq(q.field("status"), "published")
-            )
+          .withIndex("by_author_status", (q) =>
+            q.eq("authorId", user._id).eq("status", "published")
           )
           .order("desc")
           .take(3);
@@ -158,7 +146,7 @@ export const getMyFollowing = query({
     // Get following
     const follows = await ctx.db
       .query("follows")
-      .filter((q) => q.eq(q.field("followerId"), currentUser._id))
+      .withIndex("by_follower", (q) => q.eq("followerId", currentUser._id))
       .order("desc")
       .take(limit);
 
@@ -171,17 +159,14 @@ export const getMyFollowing = query({
         // Get follower count
         const followerCount = await ctx.db
           .query("follows")
-          .filter((q) => q.eq(q.field("followingId"), user._id))
+          .withIndex("by_following", (q) => q.eq("followingId", user._id))
           .collect();
 
         // Get recent posts
         const recentPosts = await ctx.db
           .query("posts")
-          .filter((q) =>
-            q.and(
-              q.eq(q.field("authorId"), user._id),
-              q.eq(q.field("status"), "published")
-            )
+          .withIndex("by_author_status", (q) =>
+            q.eq("authorId", user._id).eq("status", "published")
           )
           .order("desc")
           .take(3);

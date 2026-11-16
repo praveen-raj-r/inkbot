@@ -6,13 +6,14 @@ export const getPublishedPostsByUsername = query({
   args: {
     username: v.string(),
     limit: v.optional(v.number()),
-    cursor: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // First get the user by username
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("username"), args.username))
+      .withIndex("by_username", (q) =>
+        q.eq("username", args.username.toLowerCase())
+      )
       .unique();
 
     if (!user) {
@@ -20,18 +21,14 @@ export const getPublishedPostsByUsername = query({
     }
 
     // Get published posts by this user
-    let query = ctx.db
+    const limit = Math.min(args.limit || 10, 50);
+    const posts = await ctx.db
       .query("posts")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("authorId"), user._id),
-          q.eq(q.field("status"), "published")
-        )
+      .withIndex("by_author_status", (q) =>
+        q.eq("authorId", user._id).eq("status", "published")
       )
-      .order("desc");
-
-    const limit = args.limit || 10;
-    const posts = await query.take(limit + 1);
+      .order("desc")
+      .take(limit + 1);
 
     const hasMore = posts.length > limit;
     const finalPosts = hasMore ? posts.slice(0, limit) : posts;
@@ -52,7 +49,6 @@ export const getPublishedPostsByUsername = query({
     return {
       posts: postsWithAuthor,
       hasMore,
-      nextCursor: hasMore ? finalPosts[finalPosts.length - 1]._id : null,
     };
   },
 });
@@ -67,7 +63,9 @@ export const getPublishedPost = query({
     // Get the user by username
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("username"), args.username))
+      .withIndex("by_username", (q) =>
+        q.eq("username", args.username.toLowerCase())
+      )
       .unique();
 
     if (!user) {
@@ -120,11 +118,8 @@ export const incrementViewCount = mutation({
     // Check if we already have stats for today
     const existingStats = await ctx.db
       .query("dailyStats")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("postId"), args.postId),
-          q.eq(q.field("date"), today)
-        )
+      .withIndex("by_post_date", (q) =>
+        q.eq("postId", args.postId).eq("date", today)
       )
       .unique();
 

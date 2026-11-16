@@ -21,13 +21,10 @@ export const createInternal = internalMutation({
     // Check for existing draft
     const existingDraft = await ctx.db
       .query("posts")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("authorId"), user._id),
-          q.eq(q.field("status"), "draft")
-        )
+      .withIndex("by_author_status", (q) =>
+        q.eq("authorId", user._id).eq("status", "draft")
       )
-      .unique();
+      .first();
 
     const now = Date.now();
 
@@ -149,13 +146,10 @@ export const getUserDraft = query({
 
     const draft = await ctx.db
       .query("posts")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("authorId"), user._id),
-          q.eq(q.field("status"), "draft")
-        )
+      .withIndex("by_author_status", (q) =>
+        q.eq("authorId", user._id).eq("status", "draft")
       )
-      .unique();
+      .first();
 
     return draft;
   },
@@ -172,16 +166,14 @@ export const getUserPosts = query({
       return [];
     }
 
-    let query = ctx.db
+    const posts = await ctx.db
       .query("posts")
-      .filter((q) => q.eq(q.field("authorId"), user._id));
-
-    // Filter by status if provided
-    if (args.status) {
-      query = query.filter((q) => q.eq(q.field("status"), args.status));
-    }
-
-    const posts = await query.order("desc").collect();
+      .withIndex("by_author_status", (q) => {
+        const byAuthor = q.eq("authorId", user._id);
+        return args.status ? byAuthor.eq("status", args.status) : byAuthor;
+      })
+      .order("desc")
+      .collect();
 
     // Add username to each post
     return posts.map((post) => ({
@@ -222,6 +214,25 @@ export const deletePost = mutation({
     if (post.authorId !== user._id) {
       throw new Error("Not authorized to delete this post");
     }
+
+    // Remove everything that hangs off the post so nothing is orphaned.
+    const comments = await ctx.db
+      .query("comments")
+      .withIndex("by_post", (q) => q.eq("postId", args.id))
+      .collect();
+    for (const c of comments) await ctx.db.delete(c._id);
+
+    const likes = await ctx.db
+      .query("likes")
+      .withIndex("by_post", (q) => q.eq("postId", args.id))
+      .collect();
+    for (const l of likes) await ctx.db.delete(l._id);
+
+    const stats = await ctx.db
+      .query("dailyStats")
+      .withIndex("by_post", (q) => q.eq("postId", args.id))
+      .collect();
+    for (const d of stats) await ctx.db.delete(d._id);
 
     await ctx.db.delete(args.id);
     return { success: true };

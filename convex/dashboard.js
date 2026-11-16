@@ -13,13 +13,13 @@ export const getAnalytics = query({
     // Get all user's posts
     const posts = await ctx.db
       .query("posts")
-      .filter((q) => q.eq(q.field("authorId"), user._id))
+      .withIndex("by_author", (q) => q.eq("authorId", user._id))
       .collect();
 
     // Get user's followers count
     const followersCount = await ctx.db
       .query("follows")
-      .filter((q) => q.eq(q.field("followingId"), user._id))
+      .withIndex("by_following", (q) => q.eq("followingId", user._id))
       .collect();
 
     // Calculate analytics
@@ -74,7 +74,7 @@ export const getRecentActivity = query({
     // Get user's posts
     const posts = await ctx.db
       .query("posts")
-      .filter((q) => q.eq(q.field("authorId"), user._id))
+      .withIndex("by_author", (q) => q.eq("authorId", user._id))
       .collect();
 
     const postIds = posts.map((p) => p._id);
@@ -84,7 +84,7 @@ export const getRecentActivity = query({
     for (const postId of postIds) {
       const likes = await ctx.db
         .query("likes")
-        .filter((q) => q.eq(q.field("postId"), postId))
+        .withIndex("by_post", (q) => q.eq("postId", postId))
         .order("desc")
         .take(5);
 
@@ -109,11 +109,8 @@ export const getRecentActivity = query({
     for (const postId of postIds) {
       const comments = await ctx.db
         .query("comments")
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("postId"), postId),
-            q.eq(q.field("status"), "approved")
-          )
+        .withIndex("by_post_status", (q) =>
+          q.eq("postId", postId).eq("status", "approved")
         )
         .order("desc")
         .take(5);
@@ -135,7 +132,7 @@ export const getRecentActivity = query({
     // Get recent followers
     const recentFollowers = await ctx.db
       .query("follows")
-      .filter((q) => q.eq(q.field("followingId"), user._id))
+      .withIndex("by_following", (q) => q.eq("followingId", user._id))
       .order("desc")
       .take(5);
 
@@ -170,7 +167,7 @@ export const getPostsWithAnalytics = query({
     // comment query is needed here.
     return await ctx.db
       .query("posts")
-      .filter((q) => q.eq(q.field("authorId"), user._id))
+      .withIndex("by_author", (q) => q.eq("authorId", user._id))
       .order("desc")
       .take(args.limit || 5);
   },
@@ -184,7 +181,7 @@ export const getDailyViews = query({
     // Get user's posts
     const userPosts = await ctx.db
       .query("posts")
-      .filter((q) => q.eq(q.field("authorId"), user._id))
+      .withIndex("by_author", (q) => q.eq("authorId", user._id))
       .collect();
 
     const postIds = userPosts.map((post) => post._id);
@@ -207,10 +204,16 @@ export const getDailyViews = query({
     }
 
     // Get daily stats for all user's posts
-    const dailyStats = await ctx.db
-      .query("dailyStats")
-      .filter((q) => q.or(...postIds.map((id) => q.eq(q.field("postId"), id))))
-      .collect();
+    const dailyStats = (
+      await Promise.all(
+        postIds.map((id) =>
+          ctx.db
+            .query("dailyStats")
+            .withIndex("by_post", (q) => q.eq("postId", id))
+            .collect()
+        )
+      )
+    ).flat();
 
     // Aggregate views by date
     const viewsByDate = {};

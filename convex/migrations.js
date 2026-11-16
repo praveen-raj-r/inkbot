@@ -24,3 +24,29 @@ export const backfillCommentCounts = internalMutation({
     return { postsChecked: posts.length };
   },
 });
+
+// Usernames are now stored lowercase. Run once after deploying:
+//   npx convex run migrations:lowercaseUsernames
+// Returns any usernames that collide once lowercased (left unchanged).
+export const lowercaseUsernames = internalMutation({
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    const taken = new Set(
+      users.map((u) => u.username).filter((n) => n && n === n.toLowerCase())
+    );
+    const collisions = [];
+
+    for (const user of users) {
+      if (!user.username || user.username === user.username.toLowerCase())
+        continue;
+      const lower = user.username.toLowerCase();
+      if (taken.has(lower)) {
+        collisions.push(user.username);
+        continue;
+      }
+      taken.add(lower);
+      await ctx.db.patch(user._id, { username: lower });
+    }
+    return { collisions };
+  },
+});

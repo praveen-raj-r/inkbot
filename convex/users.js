@@ -2,6 +2,12 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getCurrentUserOrThrow } from "./lib/auth";
 
+// Routes that live at /<segment> and must not be claimable as usernames.
+const RESERVED_USERNAMES = new Set([
+  "dashboard", "feed", "sign-in", "sign-up", "api", "admin", "settings",
+  "create", "posts", "followers", "login", "logout", "about", "help",
+]);
+
 export const store = mutation({
   args: {},
   handler: async (ctx) => {
@@ -20,9 +26,14 @@ export const store = mutation({
 
     if (user !== null) {
       // If we've seen this identity before but the name has changed, patch the value.
-      if (user.name !== identity.name) {
-        await ctx.db.patch(user._id, { name: identity.name });
-      }
+      const patch = {};
+      if (identity.name && user.name !== identity.name)
+        patch.name = identity.name;
+      if (identity.email && user.email !== identity.email)
+        patch.email = identity.email;
+      if (identity.pictureUrl && user.imageUrl !== identity.pictureUrl)
+        patch.imageUrl = identity.pictureUrl;
+      if (Object.keys(patch).length > 0) await ctx.db.patch(user._id, patch);
       return user._id;
     }
 
@@ -52,23 +63,30 @@ export const updateUsername = mutation({
   handler: async (ctx, args) => {
     const user = await getCurrentUserOrThrow(ctx);
 
+    // Usernames are stored lowercase so lookups are case-insensitive.
+    const username = args.username.toLowerCase();
+
     // Validate username format
-    const usernameRegex = /^[a-zA-Z0-9_-]+$/;
-    if (!usernameRegex.test(args.username)) {
+    const usernameRegex = /^[a-z0-9_-]+$/;
+    if (!usernameRegex.test(username)) {
       throw new Error(
         "Username can only contain letters, numbers, underscores, and hyphens",
       );
     }
 
-    if (args.username.length < 3 || args.username.length > 20) {
+    if (username.length < 3 || username.length > 20) {
       throw new Error("Username must be between 3 and 20 characters");
     }
 
+    if (RESERVED_USERNAMES.has(username)) {
+      return { ok: false, code: "USERNAME_TAKEN" };
+    }
+
     // Check if username is already taken (skip check if it's the same as current)
-    if (args.username !== (user.username ?? "")) {
+    if (username !== (user.username ?? "")) {
       const existingUser = await ctx.db
         .query("users")
-        .withIndex("by_username", (q) => q.eq("username", args.username))
+        .withIndex("by_username", (q) => q.eq("username", username))
         .unique();
 
       if (existingUser && existingUser._id !== user._id) {
@@ -81,7 +99,7 @@ export const updateUsername = mutation({
 
     // Update username
     await ctx.db.patch(user._id, {
-      username: args.username,
+      username,
       lastActiveAt: Date.now(),
     });
 
@@ -99,7 +117,9 @@ export const getByUsername = query({
 
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("username"), args.username))
+      .withIndex("by_username", (q) =>
+        q.eq("username", args.username.toLowerCase())
+      )
       .unique();
 
     if (!user) {

@@ -12,7 +12,7 @@ export const getFeed = query({
 
     const allPosts = await ctx.db
       .query("posts")
-      .filter((q) => q.eq(q.field("status"), "published"))
+      .withIndex("by_published", (q) => q.eq("status", "published"))
       .order("desc")
       .take(limit + 1);
 
@@ -56,7 +56,7 @@ export const getSuggestedUsers = query({
       // Get users already being followed
       const follows = await ctx.db
         .query("follows")
-        .filter((q) => q.eq(q.field("followerId"), currentUser._id))
+        .withIndex("by_follower", (q) => q.eq("followerId", currentUser._id))
         .collect();
 
       followedUserIds = follows.map((follow) => follow.followingId);
@@ -76,11 +76,8 @@ export const getSuggestedUsers = query({
           // Get user's published posts
           const posts = await ctx.db
             .query("posts")
-            .filter((q) =>
-              q.and(
-                q.eq(q.field("authorId"), user._id),
-                q.eq(q.field("status"), "published")
-              )
+            .withIndex("by_author_status", (q) =>
+              q.eq("authorId", user._id).eq("status", "published")
             )
             .order("desc")
             .take(5);
@@ -88,7 +85,7 @@ export const getSuggestedUsers = query({
           // Get follower count
           const followers = await ctx.db
             .query("follows")
-            .filter((q) => q.eq(q.field("followingId"), user._id))
+            .withIndex("by_following", (q) => q.eq("followingId", user._id))
             .collect();
 
           // Calculate engagement score for ranking
@@ -152,11 +149,8 @@ export const getTrendingPosts = query({
     // Get recent published posts
     const recentPosts = await ctx.db
       .query("posts")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("status"), "published"),
-          q.gte(q.field("publishedAt"), weekAgo)
-        )
+      .withIndex("by_published", (q) =>
+        q.eq("status", "published").gte("publishedAt", weekAgo)
       )
       .collect();
 

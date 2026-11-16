@@ -11,6 +11,40 @@ import { sanitizePostContent } from "./lib/sanitize";
 // mutation runtime — clean the content, then hand the actual write off to
 // an internal mutation in convex/posts.js.
 
+const MAX_TITLE = 200;
+const MAX_CONTENT = 200000;
+const MAX_TAGS = 10;
+const MAX_TAG_LENGTH = 50;
+const MAX_CATEGORY = 50;
+
+function validatePost(args) {
+  if (
+    args.title !== undefined &&
+    (!args.title.trim() || args.title.length > MAX_TITLE)
+  )
+    throw new Error(`Title must be 1-${MAX_TITLE} characters`);
+  if (args.content !== undefined && args.content.length > MAX_CONTENT)
+    throw new Error("Content is too long");
+  if (args.tags !== undefined) {
+    if (args.tags.length > MAX_TAGS)
+      throw new Error(`At most ${MAX_TAGS} tags`);
+    if (args.tags.some((t) => t.length > MAX_TAG_LENGTH))
+      throw new Error(`Tags must be at most ${MAX_TAG_LENGTH} characters`);
+  }
+  if (args.category !== undefined && args.category.length > MAX_CATEGORY)
+    throw new Error("Category is too long");
+  if (args.featuredImage) {
+    let url;
+    try {
+      url = new URL(args.featuredImage);
+    } catch {
+      throw new Error("Invalid featured image URL");
+    }
+    if (url.protocol !== "https:" || url.hostname !== "ik.imagekit.io")
+      throw new Error("Featured image must be uploaded through the editor");
+  }
+}
+
 export const create = action({
   args: {
     title: v.string(),
@@ -22,6 +56,7 @@ export const create = action({
     scheduledFor: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    validatePost(args);
     return await ctx.runMutation(internal.posts.createInternal, {
       ...args,
       content: sanitizePostContent(args.content),
@@ -41,6 +76,7 @@ export const update = action({
     scheduledFor: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    validatePost(args);
     return await ctx.runMutation(internal.posts.updateInternal, {
       ...args,
       content:
