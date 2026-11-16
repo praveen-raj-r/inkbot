@@ -46,8 +46,16 @@ export const getAnalytics = query({
     // Simple growth calculation (you can enhance this)
     const viewsGrowth = totalViews > 0 ? (recentViews / totalViews) * 100 : 0;
     const likesGrowth = totalLikes > 0 ? (recentLikes / totalLikes) * 100 : 0;
-    const commentsGrowth = totalComments > 0 ? 15 : 0; // Placeholder
-    const followersGrowth = followersCount.length > 0 ? 12 : 0; // Placeholder
+    // No per-comment history is aggregated here, so don't invent a number.
+    const commentsGrowth = 0;
+    // Followers gained in the last 30 days as a share of all followers.
+    const recentFollowers = followersCount.filter(
+      (f) => f.createdAt > thirtyDaysAgo
+    ).length;
+    const followersGrowth =
+      followersCount.length > 0
+        ? (recentFollowers / followersCount.length) * 100
+        : 0;
 
     return {
       totalViews,
@@ -57,7 +65,7 @@ export const getAnalytics = query({
       viewsGrowth: Math.round(viewsGrowth * 10) / 10,
       likesGrowth: Math.round(likesGrowth * 10) / 10,
       commentsGrowth,
-      followersGrowth,
+      followersGrowth: Math.round(followersGrowth * 10) / 10,
     };
   },
 });

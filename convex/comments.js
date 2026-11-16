@@ -20,6 +20,19 @@ export const addComment = mutation({
       throw new Error("Post not found or not published");
     }
 
+    // Simple per-user rate limit: at most 5 comments per minute.
+    const recent = await ctx.db
+      .query("comments")
+      .withIndex("by_author", (q) => q.eq("authorId", user._id))
+      .order("desc")
+      .take(5);
+    if (
+      recent.length === 5 &&
+      recent[4].createdAt > Date.now() - 60 * 1000
+    ) {
+      throw new Error("You're commenting too fast. Please wait a minute.");
+    }
+
     // Validate content
     if (!args.content.trim() || args.content.length > 1000) {
       throw new Error("Comment must be between 1-1000 characters");
