@@ -1,4 +1,3 @@
-/* eslint-disable */
 /**
  * Generated `api` utility.
  *
@@ -9,10 +8,15 @@
  */
 
 import type * as comments from "../comments.js";
+import type * as crons from "../crons.js";
 import type * as dashboard from "../dashboard.js";
 import type * as feed from "../feed.js";
 import type * as follows from "../follows.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_sanitize from "../lib/sanitize.js";
 import type * as likes from "../likes.js";
+import type * as migrations from "../migrations.js";
+import type * as postActions from "../postActions.js";
 import type * as posts from "../posts.js";
 import type * as public_ from "../public.js";
 import type * as users from "../users.js";
@@ -25,10 +29,15 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   comments: typeof comments;
+  crons: typeof crons;
   dashboard: typeof dashboard;
   feed: typeof feed;
   follows: typeof follows;
+  "lib/auth": typeof lib_auth;
+  "lib/sanitize": typeof lib_sanitize;
   likes: typeof likes;
+  migrations: typeof migrations;
+  postActions: typeof postActions;
   posts: typeof posts;
   public: typeof public_;
   users: typeof users;
