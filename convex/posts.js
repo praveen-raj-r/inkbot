@@ -195,7 +195,14 @@ export const getUserPosts = query({
 export const getById = query({
   args: { id: v.id("posts") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const post = await ctx.db.get(args.id);
+    if (!post) return null;
+
+    // Drafts (and anything unpublished) are only visible to their author.
+    const user = await getCurrentUser(ctx);
+    if (!user || post.authorId !== user._id) return null;
+
+    return post;
   },
 });
 

@@ -1,41 +1,30 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getCurrentUser } from "./lib/auth";
+import { getCurrentUserOrThrow, getCurrentUser } from "./lib/auth";
 
 // Toggle like on a post
 export const toggleLike = mutation({
   args: {
     postId: v.id("posts"),
-    userId: v.optional(v.id("users")), // Optional for anonymous likes
   },
   handler: async (ctx, args) => {
+    // Identity always comes from auth, never from the client.
+    const user = await getCurrentUserOrThrow(ctx);
+    const userId = user._id;
+
     const post = await ctx.db.get(args.postId);
 
     if (!post || post.status !== "published") {
       throw new Error("Post not found or not published");
     }
 
-    let userId = args.userId;
-
-    // If no userId provided, try to get from auth
-    if (!userId) {
-      const user = await getCurrentUser(ctx);
-      userId = user?._id;
-    }
-
     // Check if already liked
-    let existingLike;
-    if (userId) {
-      existingLike = await ctx.db
-        .query("likes")
-        .filter((q) =>
-          q.and(
-            q.eq(q.field("postId"), args.postId),
-            q.eq(q.field("userId"), userId)
-          )
-        )
-        .unique();
-    }
+    const existingLike = await ctx.db
+      .query("likes")
+      .withIndex("by_post_user", (q) =>
+        q.eq("postId", args.postId).eq("userId", userId)
+      )
+      .unique();
 
     if (existingLike) {
       // Unlike - remove the like
@@ -69,27 +58,17 @@ export const toggleLike = mutation({
 export const hasUserLiked = query({
   args: {
     postId: v.id("posts"),
-    userId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    let userId = args.userId;
-
-    // If no userId provided, try to get from auth
-    if (!userId) {
-      const user = await getCurrentUser(ctx);
-      if (!user) {
-        return false;
-      }
-      userId = user._id;
+    const user = await getCurrentUser(ctx);
+    if (!user) {
+      return false;
     }
 
     const like = await ctx.db
       .query("likes")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("postId"), args.postId),
-          q.eq(q.field("userId"), userId)
-        )
+      .withIndex("by_post_user", (q) =>
+        q.eq("postId", args.postId).eq("userId", user._id)
       )
       .unique();
 

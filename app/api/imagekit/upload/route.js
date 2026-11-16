@@ -9,6 +9,14 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT,
 });
 
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
+
 export async function POST(request) {
   try {
     // Verify authentication
@@ -24,6 +32,20 @@ export async function POST(request) {
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    }
+
+    if (typeof file === "string" || !ALLOWED_TYPES.has(file.type)) {
+      return NextResponse.json(
+        { error: "Only JPEG, PNG, WebP or GIF images are allowed" },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_FILE_BYTES) {
+      return NextResponse.json(
+        { error: "Image must be 5MB or smaller" },
+        { status: 413 }
+      );
     }
 
     // Convert file to buffer
@@ -59,7 +81,6 @@ export async function POST(request) {
       {
         success: false,
         error: "Failed to upload image",
-        details: error.message,
       },
       { status: 500 }
     );

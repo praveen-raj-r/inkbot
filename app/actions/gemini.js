@@ -1,14 +1,45 @@
 "use server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { auth } from "@clerk/nextjs/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+const MAX_TITLE_LENGTH = 200;
+const MAX_CONTENT_LENGTH = 50000;
+
+async function requireUser() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be signed in to use AI features");
+  }
+}
+
+// Only surface errors we raised ourselves; log and mask everything else.
+function publicError(error, fallback) {
+  const safe = [
+    "You must be signed in to use AI features",
+    "Title is required to generate content",
+    "Title is too long",
+    "Content is required for improvement",
+    "Content is too long",
+  ];
+  return safe.includes(error?.message) ? error.message : fallback;
+}
+
 export async function generateBlogContent(title, category = "", tags = []) {
   try {
+    await requireUser();
     if (!title || title.trim().length === 0) {
       throw new Error("Title is required to generate content");
     }
+    if (title.length > MAX_TITLE_LENGTH) {
+      throw new Error("Title is too long");
+    }
+    category = String(category).slice(0, 100);
+    tags = (Array.isArray(tags) ? tags : []).slice(0, 10).map((t) =>
+      String(t).slice(0, 50)
+    );
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
@@ -69,7 +100,7 @@ Start directly with the introduction paragraph.
 
     return {
       success: false,
-      error: error.message || "Failed to generate content. Please try again.",
+      error: publicError(error, "Failed to generate content. Please try again."),
     };
   }
 }
@@ -79,8 +110,12 @@ export async function improveContent(
   improvementType = "enhance"
 ) {
   try {
+    await requireUser();
     if (!currentContent || currentContent.trim().length === 0) {
       throw new Error("Content is required for improvement");
+    }
+    if (currentContent.length > MAX_CONTENT_LENGTH) {
+      throw new Error("Content is too long");
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
@@ -146,7 +181,7 @@ Requirements:
     console.error("Content improvement error:", error);
     return {
       success: false,
-      error: error.message || "Failed to improve content. Please try again.",
+      error: publicError(error, "Failed to improve content. Please try again."),
     };
   }
 }
